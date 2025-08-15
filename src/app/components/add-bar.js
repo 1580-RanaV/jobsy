@@ -2,7 +2,7 @@
 'use client';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { AlertTriangle, X, ChevronDown, ChevronUp, Code } from 'lucide-react';
+import { AlertTriangle, X, ChevronDown, ChevronUp, Code, Loader2 } from 'lucide-react';
 
 // Job Filled Alert Component
 function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
@@ -143,14 +143,16 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
 
 export default function AddBar() {
   const [url, setUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [jobFilledAlert, setJobFilledAlert] = useState({
     isVisible: false,
     jobUrl: '',
     detectedPattern: ''
   });
 
-  // Updated addFromUrl function with job filled detection
+  // Updated addFromUrl function with loading state
   async function addFromUrl(u) {
+    setIsLoading(true);
     try {
       const r = await fetch('/api/extract?url=' + encodeURIComponent(u));
       const data = await r.json();
@@ -178,6 +180,8 @@ export default function AddBar() {
     } catch (error) {
       console.error('Error adding job:', error);
       toast.error('Could not add this URL');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -194,7 +198,7 @@ export default function AddBar() {
   }
 
   async function handleAdd() {
-    if (!url) return;
+    if (!url || isLoading) return;
     if (!looksJobLike(url)) {
       toast.error('That doesnt look like a job posting URL');
       return;
@@ -203,6 +207,7 @@ export default function AddBar() {
   }
 
   async function handleFromClipboard() {
+    if (isLoading) return;
     try {
       const t = await navigator.clipboard.readText();
       if (t) setUrl(t);
@@ -234,7 +239,8 @@ export default function AddBar() {
     'text-2xs sm:text-xs md:text-sm lg:text-base ' +
     'bg-neutral-900 text-white border border-neutral-900 hover:bg-black transition ' +
     'focus:outline-none focus:ring-2 focus:ring-black/20 ' +
-    'whitespace-nowrap leading-none font-medium';
+    'whitespace-nowrap leading-none font-medium ' +
+    'disabled:opacity-50 disabled:cursor-not-allowed';
 
   return (
     <>
@@ -248,6 +254,7 @@ export default function AddBar() {
                 outline-none focus:ring-2 focus:ring-black/20
                 placeholder:text-neutral-500 text-xs leading-none
                 border border-neutral-200
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
               placeholder="Paste job URL…"
               value={url}
@@ -255,19 +262,31 @@ export default function AddBar() {
               onKeyDown={onKeyDown}
               aria-label="Job URL"
               inputMode="url"
+              disabled={isLoading}
             />
             <div className="flex gap-1">
-              <button onClick={handleFromClipboard} className={`${btn} flex-1`}>
+              <button 
+                onClick={handleFromClipboard} 
+                className={btn}
+                disabled={isLoading}
+              >
                 <span className="block sm:hidden">Clipboard</span>
                 <span className="hidden sm:block">From Clipboard</span>
               </button>
               <button
                 onClick={handleAdd}
-                className={`${btn} flex-1`}
-                disabled={!url}
-                aria-disabled={!url}
+                className={btn}
+                disabled={!url || isLoading}
+                aria-disabled={!url || isLoading}
               >
-                Add
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Adding...</span>
+                  </div>
+                ) : (
+                  'Add'
+                )}
               </button>
             </div>
           </div>
@@ -280,6 +299,7 @@ export default function AddBar() {
                 outline-none focus:ring-2 focus:ring-black/20
                 placeholder:text-neutral-500 text-sm sm:text-[15px] leading-none
                 border border-neutral-200
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
               placeholder="Paste job URL…"
               value={url}
@@ -287,9 +307,14 @@ export default function AddBar() {
               onKeyDown={onKeyDown}
               aria-label="Job URL"
               inputMode="url"
+              disabled={isLoading}
             />
 
-            <button onClick={handleFromClipboard} className={btn}>
+            <button 
+              onClick={handleFromClipboard} 
+              className={btn}
+              disabled={isLoading}
+            >
               <span className="hidden md:block">From Clipboard</span>
               <span className="block md:hidden">Clipboard</span>
             </button>
@@ -297,10 +322,18 @@ export default function AddBar() {
             <button
               onClick={handleAdd}
               className={btn}
-              disabled={!url}
-              aria-disabled={!url}
+              disabled={!url || isLoading}
+              aria-disabled={!url || isLoading}
             >
-              Add
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="hidden sm:block">Adding...</span>
+                  <span className="block sm:hidden">...</span>
+                </div>
+              ) : (
+                'Add'
+              )}
             </button>
           </div>
         </div>

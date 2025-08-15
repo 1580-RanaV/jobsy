@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { groqClient } from '@/app/lib/groq';
 import {
-  load, text, companyFrom, roleFrom, locationFrom,
+  load, text, roleFrom, locationFrom,
   salaryFrom, experienceFrom, deadlineFrom
 } from '@/app/lib/extract';
 import {
@@ -27,6 +27,267 @@ const OutSchema = z.object({
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+
+// Enhanced company name extraction from domain
+function extractCompanyFromDomain(hostname) {
+  const parsed = parseDomain(hostname);
+  const domain = parsed.domain;
+  
+  if (!domain) return '';
+  
+  // Common domain-to-company mappings
+  const domainMappings = {
+    'google': 'Google',
+    'microsoft': 'Microsoft',
+    'amazon': 'Amazon',
+    'apple': 'Apple',
+    'meta': 'Meta',
+    'facebook': 'Facebook',
+    'netflix': 'Netflix',
+    'uber': 'Uber',
+    'airbnb': 'Airbnb',
+    'spotify': 'Spotify',
+    'linkedin': 'LinkedIn',
+    'twitter': 'Twitter',
+    'adobe': 'Adobe',
+    'salesforce': 'Salesforce',
+    'oracle': 'Oracle',
+    'ibm': 'IBM',
+    'intel': 'Intel',
+    'nvidia': 'NVIDIA',
+    'tesla': 'Tesla',
+    'paypal': 'PayPal',
+    'shopify': 'Shopify',
+    'atlassian': 'Atlassian',
+    'slack': 'Slack',
+    'zoom': 'Zoom',
+    'dropbox': 'Dropbox',
+    'github': 'GitHub',
+    'gitlab': 'GitLab',
+    'stackoverflow': 'Stack Overflow',
+    'reddit': 'Reddit',
+    'pinterest': 'Pinterest',
+    'snapchat': 'Snapchat',
+    'tiktok': 'TikTok',
+    'whatsapp': 'WhatsApp',
+    'instagram': 'Instagram',
+    'youtube': 'YouTube',
+    // Indian companies
+    'infosys': 'Infosys',
+    'tcs': 'Tata Consultancy Services',
+    'wipro': 'Wipro',
+    'hcl': 'HCL Technologies',
+    'techMahindra': 'Tech Mahindra',
+    'mindtree': 'Mindtree',
+    'capgemini': 'Capgemini',
+    'accenture': 'Accenture',
+    'cognizant': 'Cognizant',
+    'flipkart': 'Flipkart',
+    'paytm': 'Paytm',
+    'zomato': 'Zomato',
+    'swiggy': 'Swiggy',
+    'ola': 'Ola',
+    'byju': "BYJU'S",
+    'fresworks': 'Freshworks',
+    'zoho': 'Zoho',
+    'phonepe': 'PhonePe',
+    'razorpay': 'Razorpay',
+    'policybazaar': 'PolicyBazaar',
+    'nykaa': 'Nykaa',
+    'bigbasket': 'BigBasket',
+    'grofers': 'Grofers',
+    'myntra': 'Myntra',
+    'jabong': 'Jabong',
+    'snapdeal': 'Snapdeal',
+    'makemytrip': 'MakeMyTrip',
+    'goibibo': 'Goibibo',
+    'cleartrip': 'Cleartrip',
+    'redbus': 'redBus',
+    'practo': 'Practo',
+    'lenskart': 'Lenskart',
+    'urbancompany': 'Urban Company',
+    'dunzo': 'Dunzo',
+    'shadowfax': 'Shadowfax',
+    'delhivery': 'Delhivery'
+  };
+
+  // Direct mapping
+  const lowerDomain = domain.toLowerCase();
+  if (domainMappings[lowerDomain]) {
+    return domainMappings[lowerDomain];
+  }
+
+  // Handle compound words and variations
+  for (const [key, value] of Object.entries(domainMappings)) {
+    if (lowerDomain.includes(key) || key.includes(lowerDomain)) {
+      return value;
+    }
+  }
+
+  // Clean up domain name for better presentation
+  let cleanName = domain
+    .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
+    .replace(/\b\w/g, l => l.toUpperCase()) // Capitalize first letter of each word
+    .replace(/\s+/g, ' ') // Remove extra spaces
+    .trim();
+
+  // Handle common patterns
+  if (cleanName.toLowerCase().includes('careers')) {
+    cleanName = cleanName.replace(/careers/i, '').trim();
+  }
+  if (cleanName.toLowerCase().includes('jobs')) {
+    cleanName = cleanName.replace(/jobs/i, '').trim();
+  }
+
+  return cleanName || domain;
+}
+
+// Check if text looks like a job title rather than company name
+function looksLikeJobTitle(text) {
+  const jobTitlePatterns = [
+    /\b(engineer|developer|manager|analyst|director|lead|senior|junior|intern|associate|specialist|coordinator|executive|officer|consultant|architect|designer|scientist|researcher|technician|administrator|supervisor|assistant)\b/i,
+    /\b(software|frontend|backend|full.?stack|mobile|web|data|cloud|devops|qa|testing|security|network|system|database|ai|ml|machine.learning|product|project|business|marketing|sales|hr|finance|accounting|legal|operations)\b/i,
+    /\b(position|role|opening|vacancy|job|career|opportunity)\b/i,
+    /\bin\b.*(india|bangalore|mumbai|delhi|hyderabad|pune|chennai|kolkata|ahmedabad|gurugram|noida)/i
+  ];
+  
+  return jobTitlePatterns.some(pattern => pattern.test(text));
+}
+
+// Enhanced company name extraction from page content
+function extractCompanyFromPage($, hostname) {
+  // Priority order selectors - most specific first
+  const highPrioritySelectors = [
+    // Direct company data attributes
+    '[data-company]:not([data-company*="engineer"]):not([data-company*="developer"]):not([data-company*="manager"])',
+    '[data-company-name]:not([data-company-name*="engineer"]):not([data-company-name*="developer"])',
+    // Meta tags (usually reliable)
+    'meta[property="og:site_name"]',
+    'meta[name="application-name"]',
+    // Brand/logo elements
+    '.navbar-brand:not(:has(.job)):not(:has(.career))',
+    '.header-logo',
+    '.brand-name',
+    '.logo-text',
+    // Company specific selectors
+    '.company-name:not(.job-title)',
+    '.employer-name',
+    '.organization-name'
+  ];
+
+  const mediumPrioritySelectors = [
+    // Structured data
+    '[itemtype*="Organization"] [itemprop="name"]',
+    '[itemtype*="Corporation"] [itemprop="name"]',
+    // Header elements
+    'header .company:not(.job)',
+    'header .brand',
+    '.site-title:not(:contains("job")):not(:contains("career"))',
+    // Less specific company selectors
+    '.company-header',
+    '.company-title:not(.job-title)'
+  ];
+
+  // Try high priority selectors first
+  for (const selector of highPrioritySelectors) {
+    try {
+      const element = $(selector).first();
+      if (element.length) {
+        let text = element.attr('content') || element.attr('data-company') || 
+                  element.attr('data-company-name') || element.text();
+        
+        text = text?.trim() || '';
+        if (text && text.length > 1 && text.length < 80 && !looksLikeJobTitle(text)) {
+          // Clean up the text
+          text = text.replace(/\s+/g, ' ').trim();
+          // Skip generic terms
+          if (!/^(careers?|jobs?|hiring|apply|work|employment|opportunities?|home|about|contact)$/i.test(text)) {
+            console.log('Company found via high priority selector:', selector, '→', text);
+            return text;
+          }
+        }
+      }
+    } catch (e) {
+      // Continue to next selector
+    }
+  }
+
+  // Try medium priority selectors
+  for (const selector of mediumPrioritySelectors) {
+    try {
+      const element = $(selector).first();
+      if (element.length) {
+        let text = element.attr('content') || element.text();
+        text = text?.trim() || '';
+        
+        if (text && text.length > 1 && text.length < 80 && !looksLikeJobTitle(text)) {
+          text = text.replace(/\s+/g, ' ').trim();
+          if (!/^(careers?|jobs?|hiring|apply|work|employment|opportunities?|home|about|contact)$/i.test(text)) {
+            console.log('Company found via medium priority selector:', selector, '→', text);
+            return text;
+          }
+        }
+      }
+    } catch (e) {
+      // Continue to next selector
+    }
+  }
+
+  // Try extracting from page title with better patterns
+  const title = $('title').text();
+  if (title) {
+    console.log('Analyzing page title:', title);
+    
+    // Pattern 1: "Job Title at Company Name"
+    const atMatch = title.match(/\sat\s+([^|•\-–—\n]+?)(?:\s*[\|•\-–—\n]|$)/i);
+    if (atMatch && atMatch[1]) {
+      const company = atMatch[1].trim();
+      if (company.length > 1 && company.length < 60 && !looksLikeJobTitle(company)) {
+        console.log('Company found via "at" pattern:', company);
+        return company;
+      }
+    }
+
+    // Pattern 2: "Company Name | Job Title" or "Company Name - Job Title"
+    const beforeSeparator = title.match(/^([^|•\-–—\n]+?)[\s]*[\|•\-–—]/);
+    if (beforeSeparator && beforeSeparator[1]) {
+      const company = beforeSeparator[1].trim();
+      if (company.length > 1 && company.length < 60 && 
+          !looksLikeJobTitle(company) &&
+          !/^(job|career|position|role|opening|vacancy|apply)s?\b/i.test(company)) {
+        console.log('Company found via separator pattern:', company);
+        return company;
+      }
+    }
+
+    // Pattern 3: "Company Name Jobs" or "Company Name Careers"
+    const jobsCareerMatch = title.match(/^(.+?)\s+(?:jobs?|careers?)\b/i);
+    if (jobsCareerMatch && jobsCareerMatch[1]) {
+      const company = jobsCareerMatch[1].trim();
+      if (company.length > 1 && company.length < 60 && !looksLikeJobTitle(company)) {
+        console.log('Company found via jobs/careers pattern:', company);
+        return company;
+      }
+    }
+  }
+
+  return '';
+}
+
+// Enhanced company extraction function
+function enhancedCompanyFrom($, hostname) {
+  // First try to extract from page content
+  const fromPage = extractCompanyFromPage($, hostname);
+  if (fromPage) {
+    console.log('Company extracted from page:', fromPage);
+    return fromPage;
+  }
+
+  // Fallback to domain extraction
+  const fromDomain = extractCompanyFromDomain(hostname);
+  console.log('Company extracted from domain:', fromDomain);
+  return fromDomain;
+}
 
 export async function GET(req) {
   try {
@@ -167,8 +428,8 @@ export async function GET(req) {
       return NextResponse.json({ error: 'Not a job posting link' }, { status: 400 });
     }
 
-    // Extract
-    let company = companyFrom($, u.hostname);
+    // Extract using enhanced company extraction
+    let company = enhancedCompanyFrom($, u.hostname);
     let role = roleFrom($);
     let location = locationFrom($);
     let salaryText = salaryFrom($, pageText);
@@ -182,16 +443,20 @@ export async function GET(req) {
       try {
         const groq = groqClient();
         const sys =
-          'You are a strict information extractor for job postings. Return ONLY a valid JSON object with no markdown formatting, no code blocks, no explanations. Just pure JSON starting with { and ending with }. Do not invent dates that are not present. If a field does not exist, set it to "".';
+          'You are a strict information extractor for job postings. Extract ONLY the company name, not job titles or roles. Return ONLY a valid JSON object with no markdown formatting, no code blocks, no explanations. Just pure JSON starting with { and ending with }. Do not invent dates that are not present. If a field does not exist, set it to "". For company field: extract only the actual company/employer name (like "Google", "Microsoft", "Infosys"), NOT job titles, roles, or positions (avoid terms like "Engineer", "Developer", "Manager", "Analyst", etc.).';
         const prompt = `
-Extract:
-- company
-- role
+Extract from this job posting:
+- company (ONLY the company/employer name like "Google", "Infosys", "Microsoft" - NOT job titles or roles)
+- role (job title/position)
 - location (e.g., "Bengaluru, India")
 - experienceText (e.g., "2–4 years" or "")
 - deadlineText (human-readable if present; "" if none)
 - salaryText (verbatim salary like "₹12,00,000–₹18,00,000" or "")
 - expectedSalaryText (estimate INR range for this role/company/location like "₹X–₹Y")
+
+IMPORTANT: For "company" field, extract ONLY the employer/organization name. Do NOT include job titles, positions, or roles.
+
+URL: ${target}
 
 Text:
 """${pageText.slice(0, 16000)}"""
@@ -222,7 +487,10 @@ Text:
         
         const j = JSON.parse(cleanJson);
 
-        company ||= j.company || '';
+        // Use GROQ company name if our extraction failed or returned generic terms
+        if (!company || /^(careers?|jobs?|hiring|work|employment)$/i.test(company)) {
+          company = j.company || company;
+        }
         role ||= j.role || '';
         location ||= j.location || '';
         experienceText ||= j.experienceText || '';
