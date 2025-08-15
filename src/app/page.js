@@ -104,15 +104,26 @@ export default function LandingPage() {
             </div>
 
             {/* reassurance line */}
-            <div className="relative flex flex-wrap items-center justify-center gap-4 text-sm text-neutral-600">
+            <div className="relative flex flex-col items-center gap-3 text-sm text-neutral-600 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
               <span className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
                 No login. Local-first.
               </span>
-              <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
-              <span>Export / Import anytime</span>
-              <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
-              <span>Clipboard Watch support</span>
+
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
+                Identify inactive job postings.
+              </span>
+
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
+                Export / Import anytime.
+              </span>
+
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
+                Clipboard Watch support.
+              </span>
             </div>
           </div>
 

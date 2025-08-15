@@ -68,9 +68,9 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
         <thead className="sticky top-0 bg-white border-b border-neutral-200">
           <tr className="[&>th]:px-4 [&>th]:py-3 text-left text-neutral-600">
             <th className="w-[14%]">Company</th>
-            <th className="w-[36%]">Role</th>
+            <th className="w-[32%]">Role</th>
             <th className="w-[14%]">Location</th>
-            <th className="w-[10%]">Salary</th>
+            <th className="w-[14%]">Salary</th>
             <th className="w-[8%]">Exp</th>
             <th className="w-[10%]">Deadline</th>
             <th className="w-[8%]">Applied</th>
@@ -87,7 +87,11 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
                 <div className="text-neutral-900 leading-snug line-clamp-2">{job.role || '—'}</div>
               </td>
               <td className="px-4 py-3 align-top">{job.location || '—'}</td>
-              <td className="px-4 py-3 align-top">{job.salaryText || '—'}</td>
+              <td className="px-4 py-3 align-top">
+                <div className="text-xs leading-tight break-words" title={job.salaryText || '—'}>
+                  {job.salaryText || '—'}
+                </div>
+              </td>
               <td className="px-4 py-3 align-top">{job.experienceText || '—'}</td>
               <td className="px-4 py-3 align-top">
                 <Badges.Deadline badge={job.deadlineBadge} text={job.deadlineText} />

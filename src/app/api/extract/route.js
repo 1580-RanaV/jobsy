@@ -289,6 +289,134 @@ function enhancedCompanyFrom($, hostname) {
   return fromDomain;
 }
 
+// Enhanced salary extraction with debugging
+function debugSalaryExtraction($, pageText, url) {
+  console.log('\n=== SALARY EXTRACTION DEBUG START ===');
+  console.log('URL:', url);
+  
+  // Initial extraction
+  let salaryText = salaryFrom($, pageText);
+  console.log('1. Initial salaryText from salaryFrom():', JSON.stringify(salaryText));
+  
+  // Check if page contains salary-related keywords
+  const hasKeywords = /salary|pay|compensation|₹|rs\.?|rupees?|lpa|lakhs?|per annum|ctc|package/i.test(pageText);
+  console.log('2. Page contains salary keywords:', hasKeywords);
+  
+  // Look for salary patterns in page text
+  const salaryPatterns = [
+    { name: 'Rupee symbol with numbers', regex: /₹[\d,]+(?:\s*-\s*₹?[\d,]+)?(?:\s*(?:per|\/)\s*(?:month|annum|year))?/gi },
+    { name: 'Rs with numbers', regex: /rs\.?\s*[\d,]+(?:\s*-\s*rs\.?[\d,]+)?(?:\s*(?:per|\/)\s*(?:month|annum|year))?/gi },
+    { name: 'LPA/Lakhs pattern', regex: /\d+(?:\.\d+)?\s*-?\s*\d*(?:\.\d+)?\s*(?:lpa|lakhs?|per annum)/gi },
+    { name: 'CTC pattern', regex: /ctc:?\s*[\d₹rs,.\s-]+(?:lpa|lakhs?|per annum)?/gi },
+    { name: 'Package pattern', regex: /package:?\s*[\d₹rs,.\s-]+(?:lpa|lakhs?|per annum)?/gi },
+    { name: 'Salary colon pattern', regex: /salary:?\s*[\d₹rs,.\s-]+(?:lpa|lakhs?|per annum)?/gi },
+    { name: 'Compensation pattern', regex: /compensation:?\s*[\d₹rs,.\s-]+(?:lpa|lakhs?|per annum)?/gi }
+  ];
+
+  let foundPatterns = [];
+  salaryPatterns.forEach(({ name, regex }) => {
+    const matches = pageText.match(regex);
+    if (matches && matches.length > 0) {
+      console.log(`3. ${name} matches:`, matches.slice(0, 3)); // Show first 3 matches
+      foundPatterns = foundPatterns.concat(matches.slice(0, 3));
+    }
+  });
+  
+  // Check specific salary-related selectors
+  const salarySelectors = [
+    { selector: '[class*="salary" i]', description: 'Class contains salary' },
+    { selector: '[data-salary]', description: 'Data salary attribute' },
+    { selector: '.compensation', description: 'Compensation class' },
+    { selector: '.pay-range', description: 'Pay range class' },
+    { selector: '[class*="compensation" i]', description: 'Class contains compensation' },
+    { selector: '.salary-range', description: 'Salary range class' },
+    { selector: '[class*="ctc" i]', description: 'Class contains CTC' },
+    { selector: '[class*="package" i]', description: 'Class contains package' },
+    { selector: '.job-salary', description: 'Job salary class' },
+    { selector: '.salary-info', description: 'Salary info class' },
+    { selector: '[id*="salary" i]', description: 'ID contains salary' },
+    { selector: 'span:contains("₹")', description: 'Spans containing rupee symbol' },
+    { selector: 'div:contains("LPA")', description: 'Divs containing LPA' }
+  ];
+
+  let foundSelectors = [];
+  salarySelectors.forEach(({ selector, description }) => {
+    try {
+      const elements = $(selector);
+      if (elements.length > 0) {
+        const text = elements.first().text().trim();
+        if (text && text.length > 0 && text.length < 200) {
+          console.log(`4. ${description} selector "${selector}" found:`, JSON.stringify(text));
+          foundSelectors.push({ selector, text, description });
+        }
+      }
+    } catch (e) {
+      console.log(`4. Selector "${selector}" error:`, e.message);
+    }
+  });
+  
+  // Try to extract salary from structured data
+  const structuredSalary = $('script[type="application/ld+json"]').map((i, el) => {
+    try {
+      const json = JSON.parse($(el).html());
+      const findSalary = (obj) => {
+        if (typeof obj !== 'object' || obj === null) return null;
+        if (obj.salary || obj.baseSalary || obj.salaryRange) {
+          return obj.salary || obj.baseSalary || obj.salaryRange;
+        }
+        for (const key in obj) {
+          const result = findSalary(obj[key]);
+          if (result) return result;
+        }
+        return null;
+      };
+      return findSalary(json);
+    } catch (e) {
+      return null;
+    }
+  }).get().filter(Boolean);
+  
+  if (structuredSalary.length > 0) {
+    console.log('5. Structured data salary found:', structuredSalary);
+  }
+
+  // Fallback extraction if original failed
+  let fallbackSalary = '';
+  if (!salaryText || salaryText === 'rs,' || salaryText === '₹' || salaryText.length < 3) {
+    console.log('6. Original extraction failed/incomplete, trying fallback...');
+    
+    // Try the best pattern matches first
+    if (foundPatterns.length > 0) {
+      // Sort by length (longer is usually more complete)
+      foundPatterns.sort((a, b) => b.length - a.length);
+      fallbackSalary = foundPatterns[0];
+      console.log('6a. Using best pattern match:', fallbackSalary);
+    }
+    // Try selector results
+    else if (foundSelectors.length > 0) {
+      // Find the most promising selector result
+      const bestSelector = foundSelectors.find(s => 
+        s.text.match(/\d/) && (s.text.includes('₹') || s.text.includes('rs') || s.text.includes('lpa'))
+      );
+      if (bestSelector) {
+        fallbackSalary = bestSelector.text;
+        console.log('6b. Using best selector result:', fallbackSalary);
+      }
+    }
+    // Try structured data
+    else if (structuredSalary.length > 0) {
+      fallbackSalary = JSON.stringify(structuredSalary[0]);
+      console.log('6c. Using structured data:', fallbackSalary);
+    }
+  }
+
+  const finalSalary = fallbackSalary || salaryText || '';
+  console.log('7. Final salary result:', JSON.stringify(finalSalary));
+  console.log('=== SALARY EXTRACTION DEBUG END ===\n');
+  
+  return finalSalary;
+}
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -432,14 +560,28 @@ export async function GET(req) {
     let company = enhancedCompanyFrom($, u.hostname);
     let role = roleFrom($);
     let location = locationFrom($);
-    let salaryText = salaryFrom($, pageText);
+    
+    // Enhanced salary extraction with debugging
+    let salaryText = debugSalaryExtraction($, pageText, target);
+    
     let experienceText = experienceFrom(pageText);
     let deadlineISO = deadlineFrom($, pageText);
     let deadlineText = deadlineISO ? new Date(deadlineISO).toDateString() : '';
     let expectedSalaryText = '';
 
+    console.log('\n=== EXTRACTION SUMMARY BEFORE GROQ ===');
+    console.log('Company:', JSON.stringify(company));
+    console.log('Role:', JSON.stringify(role));
+    console.log('Location:', JSON.stringify(location));
+    console.log('SalaryText:', JSON.stringify(salaryText));
+    console.log('ExperienceText:', JSON.stringify(experienceText));
+    console.log('DeadlineText:', JSON.stringify(deadlineText));
+
     // GROQ fallback only if needed
     if (!company || !role || !location || !salaryText || !experienceText || !deadlineText) {
+      console.log('\n=== GROQ FALLBACK TRIGGERED ===');
+      console.log('Missing fields - Company:', !company, 'Role:', !role, 'Location:', !location, 'Salary:', !salaryText, 'Experience:', !experienceText, 'Deadline:', !deadlineText);
+      
       try {
         const groq = groqClient();
         const sys =
@@ -451,10 +593,11 @@ Extract from this job posting:
 - location (e.g., "Bengaluru, India")
 - experienceText (e.g., "2–4 years" or "")
 - deadlineText (human-readable if present; "" if none)
-- salaryText (verbatim salary like "₹12,00,000–₹18,00,000" or "")
+- salaryText (verbatim COMPLETE salary like "₹12,00,000–₹18,00,000" or "5-8 LPA" - include full range, not just currency symbol)
 - expectedSalaryText (estimate INR range for this role/company/location like "₹X–₹Y")
 
 IMPORTANT: For "company" field, extract ONLY the employer/organization name. Do NOT include job titles, positions, or roles.
+IMPORTANT: For "salaryText" field, extract the COMPLETE salary information, not just currency symbols like "rs," or "₹".
 
 URL: ${target}
 
@@ -476,6 +619,7 @@ Text:
         });
 
         const raw = res.choices?.[0]?.message?.content?.trim() || '{}';
+        console.log('GROQ raw response:', raw);
         
         // Clean up markdown formatting from GROQ response
         let cleanJson = raw;
@@ -486,6 +630,7 @@ Text:
         }
         
         const j = JSON.parse(cleanJson);
+        console.log('GROQ parsed JSON:', j);
 
         // Use GROQ company name if our extraction failed or returned generic terms
         if (!company || /^(careers?|jobs?|hiring|work|employment)$/i.test(company)) {
@@ -495,13 +640,55 @@ Text:
         location ||= j.location || '';
         experienceText ||= j.experienceText || '';
         deadlineText ||= j.deadlineText || '';
-        salaryText ||= j.salaryText || '';
+        
+        // Enhanced salary handling from GROQ
+        if (!salaryText || salaryText === 'rs,' || salaryText === '₹' || salaryText.length < 3) {
+          console.log('Using GROQ salary because original was incomplete:', JSON.stringify(salaryText));
+          salaryText = j.salaryText || salaryText;
+          console.log('GROQ provided salary:', JSON.stringify(j.salaryText));
+        }
+        
         expectedSalaryText = j.expectedSalaryText || '';
+        
+        console.log('=== AFTER GROQ PROCESSING ===');
+        console.log('Final Company:', JSON.stringify(company));
+        console.log('Final Role:', JSON.stringify(role));
+        console.log('Final Location:', JSON.stringify(location));
+        console.log('Final SalaryText:', JSON.stringify(salaryText));
+        console.log('Final ExperienceText:', JSON.stringify(experienceText));
+        console.log('Final DeadlineText:', JSON.stringify(deadlineText));
+        console.log('Final ExpectedSalaryText:', JSON.stringify(expectedSalaryText));
+        
       } catch (err) {
         console.warn('GROQ fallback failed:', err?.message);
+        console.warn('GROQ error details:', err);
         if (!expectedSalaryText && role) expectedSalaryText = '₹—';
       }
+    } else {
+      console.log('=== GROQ FALLBACK SKIPPED ===');
+      console.log('All required fields present, skipping GROQ');
     }
+
+    // Final salary validation and cleanup
+    console.log('\n=== FINAL SALARY VALIDATION ===');
+    console.log('Salary before final cleanup:', JSON.stringify(salaryText));
+    
+    // If we still have incomplete salary, try one more extraction attempt
+    if (!salaryText || salaryText === 'Rs.' || salaryText === '₹' || salaryText.trim() === '') {
+      console.log('Attempting final salary extraction...');
+      
+      // Look for any number patterns with currency
+      const finalSalaryMatch = pageText.match(/(?:₹|rs\.?)\s*[\d,]+(?:\s*-\s*(?:₹|rs\.?)?[\d,]+)?|\d+(?:\.\d+)?\s*-?\s*\d*(?:\.\d+)?\s*(?:lpa|lakhs?)/i);
+      if (finalSalaryMatch) {
+        salaryText = finalSalaryMatch[0].trim();
+        console.log('Final salary extraction found:', JSON.stringify(salaryText));
+      } else {
+        console.log('No salary information found anywhere');
+        salaryText = '';
+      }
+    }
+    
+    console.log('Final salary result:', JSON.stringify(salaryText));
 
     const out = OutSchema.parse({
       url: target,
@@ -515,9 +702,13 @@ Text:
       createdAt: Date.now(),
     });
 
+    console.log('\n=== FINAL OUTPUT ===');
+    console.log('Output object:', JSON.stringify(out, null, 2));
+
     return NextResponse.json(out);
   } catch (e) {
     console.error('Extractor error:', e);
+    console.error('Error stack:', e.stack);
     return NextResponse.json({ error: e.message || 'Extraction failed' }, { status: 500 });
   }
 }

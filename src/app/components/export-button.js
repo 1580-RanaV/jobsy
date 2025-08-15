@@ -37,11 +37,11 @@ export default function ExportButton({ className = '' }) {
     <div className={`flex gap-1 sm:gap-1.5 md:gap-2 ${className}`}>
       <button onClick={dlJSON} className={baseBtn}>
         <span className="block sm:hidden">JSON</span>
-        <span className="hidden sm:block">Export JSON</span>
+        <span className="hidden sm:block text-xs">Export JSON</span>
       </button>
       <button onClick={dlCSV} className={baseBtn}>
         <span className="block sm:hidden">CSV</span>
-        <span className="hidden sm:block">Export CSV</span>
+        <span className="hidden sm:block text-xs">Export CSV</span>
       </button>
     </div>
   );

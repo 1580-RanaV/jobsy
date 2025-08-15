@@ -280,14 +280,15 @@ export default function AddBar() {
                 aria-disabled={!url || isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-xs">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>Adding...</span>
+                    <span className="text-xs">Adding...</span>
                   </div>
                 ) : (
-                  'Add'
+                  <span className="text-xs">Add</span>
                 )}
               </button>
+
             </div>
           </div>
 
@@ -315,7 +316,7 @@ export default function AddBar() {
               className={btn}
               disabled={isLoading}
             >
-              <span className="hidden md:block">From Clipboard</span>
+              <span className="hidden md:block text-xs">From Clipboard</span>
               <span className="block md:hidden">Clipboard</span>
             </button>
 
@@ -328,7 +329,7 @@ export default function AddBar() {
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                  <span className="hidden sm:block">Adding...</span>
+                  <span className="hidden sm:block text-xs">Adding...</span>
                   <span className="block sm:hidden">...</span>
                 </div>
               ) : (

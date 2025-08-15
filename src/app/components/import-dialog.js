@@ -29,7 +29,7 @@ export default function ImportDialog({ className = '' }) {
 
   return (
     <label className={`${baseBtn} ${className}`}>
-      Import
+      <span className='text-xs'>Import</span>
       <input
         type="file"
         accept="application/json"
