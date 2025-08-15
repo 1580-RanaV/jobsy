@@ -463,7 +463,7 @@ Text:
         `.trim();
 
         const res = await groq.chat.completions.create({
-          model: 'gemma2-9b-it',
+          model: 'llama-3.3-70b-versatile',
           temperature: 0.2,
           max_completion_tokens: 600,
           top_p: 1,
