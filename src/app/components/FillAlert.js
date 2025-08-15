@@ -106,43 +106,27 @@ export async function GET(req) {
       }, { status: 400 });
     }
     
-    // Enhanced inactive job detection patterns
+    // Check if job posting is inactive/filled (made less aggressive)
     const inactivePatterns = [
-      { pattern: /job.*has been filled/i, description: 'Job has been filled variations' },
-      { pattern: /position.*no longer available/i, description: 'Position no longer available' },
-      { pattern: /posting.*expired/i, description: 'Expired job postings' },
-      { pattern: /application.*closed/i, description: 'Closed application notices' },
-      { pattern: /sorry.*job.*filled/i, description: 'Apologetic filled job messages' },
-      { pattern: /this position is no longer accepting applications/i, description: 'No longer accepting applications' },
-      { pattern: /we're sorry.*this specific position is no longer available/i, description: 'Mastercard-style unavailable message' },
-      { pattern: /this job is no longer active/i, description: 'Job no longer active' },
-      { pattern: /position has been closed/i, description: 'Position closed' },
-      { pattern: /applications are no longer being accepted/i, description: 'Applications no longer accepted' },
-      { pattern: /this opportunity has expired/i, description: 'Expired opportunity' },
-      { pattern: /job opening is closed/i, description: 'Job opening closed' },
-      { pattern: /recruitment for this position has ended/i, description: 'Recruitment ended' }
+      /job.*has been filled/i,
+      /posting.*expired/i,
+      /application.*closed/i,
+      /sorry.*job.*filled/i,
+      /this position is no longer accepting applications/i
+      // Removed the broad "position no longer available" pattern for now
     ];
     
-    let detectedPattern = null;
-    const isInactive = inactivePatterns.some(({ pattern, description }) => {
-      const titleMatch = pattern.test($('title').text());
-      const textMatch = pattern.test(pageText);
-      const match = titleMatch || textMatch;
+    const isInactive = inactivePatterns.some(pattern => {
+      const match = pattern.test(pageText);
       if (match) {
-        console.log('Inactive pattern matched:', pattern.source, 'description:', description);
-        detectedPattern = pattern.source;
+        console.log('Inactive pattern matched:', pattern);
       }
       return match;
     });
     
     if (isInactive) {
-      console.log('Blocked: Job inactive, detected pattern:', detectedPattern);
-      return NextResponse.json({ 
-        error: 'Job posting is no longer active or has been filled',
-        type: 'job_filled',
-        url: target,
-        detectedPattern: detectedPattern
-      }, { status: 422 });
+      console.log('Blocked: Job inactive');
+      return NextResponse.json({ error: 'Job posting is no longer active or has been filled' }, { status: 400 });
     }
 
     const hasApply =

@@ -20,10 +20,10 @@ export default function ClipboardSwitch({ className = '' }) {
         className,
       ].join(' ')}
     >
-      <span className="block sm:hidden">
+      <span className="block sm:hidden text-lg">
         {watching ? 'Stop' : 'Clipboard'}
       </span>
-      <span className="hidden sm:block">
+      <span className="hidden sm:block text-lg">
         {watching ? 'Stop Watch' : 'Enable Clipboard Watch'}
       </span>
     </button>

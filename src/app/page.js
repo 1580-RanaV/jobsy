@@ -70,14 +70,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="relative bg-white rounded-t-3xl pt-16 pb-20 text-center max-w-6xl mx-auto px-4">
             {/* subtle glow */}
-            <div
+            {/* <div
               aria-hidden
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
                   'radial-gradient(700px 350px at 50% 0%, rgba(0,0,0,0.05), transparent 60%)',
               }}
-            />
+            /> */}
 
             <h1 className="relative text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-neutral-900 leading-[1.05] mb-6">
               Never Miss
