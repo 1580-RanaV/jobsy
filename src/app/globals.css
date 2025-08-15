@@ -1,26 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --accent: 79 70 229; /* indigo-600 as rgb */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Tighten default tracking a touch for that Loom crispness */
+h1,h2,h3,h4 { letter-spacing: -0.01em; }
+.btn-accent { @apply bg-indigo-600 hover:bg-indigo-700 text-white; }
+.card      { @apply bg-white border border-neutral-200 rounded-2xl shadow-sm; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.btn-black {
+  @apply h-10 px-4 rounded-xl bg-neutral-950 text-white hover:bg-black transition border border-neutral-900;
 }
