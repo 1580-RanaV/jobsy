@@ -218,508 +218,364 @@ export default function LandingPage() {
 
       {/* Features Bento Grid */}
       <section id="features" className="py-18">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Section header */}
-          <div className="mb-24 text-center">
-            <h2 className="mb-6 text-6xl font-bold text-neutral-900 md:text-8xl">How Jobsy Works</h2>
-            <p className="mx-auto max-w-4xl text-xl font-medium text-neutral-600">
-              Simple job tracking that keeps you organized and on time.
-            </p>
-          </div>
-
-          {/* Bento grid (WRAPPER ADDED) */}
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* Auto-capture / Paste (filled version) */}
-            <div className="lg:col-span-2 rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-              <div className="mb-8 flex items-start justify-between">
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <svg
-                    className="h-10 w-10 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5h6M7 9h10M7 13h10M9 17h6" />
-                  </svg>
-                </div>
-                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">Frictionless</span>
-              </div>
-
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Paste the job link</h3>
-              <p className="mb-8 max-w-3xl text-base font-medium text-neutral-200">
-                Copy any job posting URL and add it to Jobsy. We extract company, role, salary, experience, and deadline
-                from major job sites and company career pages.
-              </p>
-
-              {/* Filled bands */}
-              <div className="space-y-5 rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
-                {/* Band 1: Job boards */}
-                <div>
-                  <div className="mb-3 text-xs font-semibold text-neutral-300">Works with job boards</div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      'LinkedIn',
-                      'Indeed',
-                      'Naukri',
-                      'Foundit',
-                      'Glassdoor',
-                      'ZipRecruiter',
-                      'Monster',
-                      'Wellfound (AngelList)',
-                      'Hired',
-                      'Dice',
-                      'Instahyre',
-                      'Freshersworld',
-                    ].map((label) => (
-                      <span key={label} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Band 2: ATS / career platforms */}
-                <div className="border-t border-white/10 pt-4">
-                  <div className="mb-3 text-xs font-semibold text-neutral-300">ATS and company career platforms</div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      'Greenhouse',
-                      'Lever',
-                      'Ashby',
-                      'Workable',
-                      'SmartRecruiters',
-                      'iCIMS',
-                      'Taleo',
-                      'Workday',
-                      'JazzHR',
-                      'BambooHR',
-                      'Zoho Recruit',
-                      'SAP SuccessFactors',
-                    ].map((label) => (
-                      <span key={label} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Band 3: Company pages */}
-                <div className="border-t border-white/10 pt-4">
-                  <div className="mb-3 text-xs font-semibold text-neutral-300">Company career pages</div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      'Google',
-                      'Microsoft',
-                      'Amazon',
-                      'Netflix',
-                      'Stripe',
-                      'Airbnb',
-                      'Shopify',
-                      'Adobe',
-                      'Atlassian',
-                      'Uber',
-                      'Flipkart',
-                      'Swiggy',
-                      'Zomato',
-                      'TCS',
-                      'Infosys',
-                    ].map((label) => (
-                      <span key={label} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">
-                        {label}
-                      </span>
-                    ))}
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">+ Many more</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Smart extraction */}
-            <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-              <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
-                <svg
-                  className="h-10 w-10 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Smart job details</h3>
-              <p className="mb-6 text-base font-medium text-neutral-200">
-                Our extractor reads the posting and standardizes key fields so your table stays clean and consistent.
-              </p>
-
-              <ul className="space-y-3 text-sm text-neutral-200">
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                  Company and role
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                  Job location
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                  Salary range and currency
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                  Experience required
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                  Application deadline
-                </li>
-              </ul>
-
-              <div className="mt-6 rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 ring-1 ring-emerald-400/20">
-                Accurate parsing first; AI fallback only when details are missing.
-              </div>
-            </div>
-
-            {/* Reminders */}
-            <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-              <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
-                <svg
-                  className="h-10 w-10 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Smart alerts</h3>
-              <p className="mb-6 text-base font-medium text-neutral-200">
-                See due-soon and overdue banners whenever you visit. Enable browser notifications to get reminded one day
-                before deadlines.
-              </p>
-
-              <div className="space-y-3">
-                <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
-                  Due in 2 days: Software Engineer @ Mindtree.
-                </div>
-                <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
-                  Overdue: Product Designer @ Persistent Systems closed yesterday.
-                </div>
-                <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
-                  Overdue: Backend Developer @ Hexaware closed yesterday.
-                </div>
-                <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
-                  Overdue: QA Engineer @ Birlasoft closed yesterday.
-                </div>
-                <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
-                  Due in 2 days: Software Engineer @ Zensar Technologies.
-                </div>
-                <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
-                  Overdue: UI Developer @ Sonata Software closed yesterday.
-                </div>
-                <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
-                  Overdue: Support Engineer @ Mphasis closed yesterday.
-                </div>
-                <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
-                  Due in 2 days: Associate Developer @ L&T Infotech.
-                </div>
-                <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
-                  Due in 2 days: Software Engineer @ Happiest Minds.
-                </div>
-              </div>
-            </div>
-
-            {/* Privacy / Local-only */}
-            <div
-              id="privacy"
-              className="lg:col-span-2 rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10"
-            >
-              {/* Header */}
-              <div className="mb-8 flex items-start justify-between">
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <svg
-                    className="h-10 w-10 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4M5 12a7 7 0 1014 0 7 7 0 00-14 0z"
-                    />
-                  </svg>
-                </div>
-                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">
-                  100% Private • Local-only
-                </span>
-              </div>
-
-              {/* Title + Copy */}
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Track everything locally</h3>
-              <p className="mb-8 max-w-3xl text-base font-medium text-neutral-200">
-                Your application data stays on your device. No accounts, no cloud sync, no data mining. Update status
-                with one click and keep a clean audit trail.
-              </p>
-
-              {/* Stat strip */}
-              <div className="mb-8 grid grid-cols-3 gap-4">
-                <div className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
-                  <div className="text-2xl font-bold">0</div>
-                  <div className="text-xs text-neutral-300">Accounts</div>
-                </div>
-                <div className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
-                  <div className="text-2xl font-bold">0</div>
-                  <div className="text-xs text-neutral-300">Servers</div>
-                </div>
-                <div className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
-                  <div className="text-2xl font-bold">100%</div>
-                  <div className="text-xs text-neutral-300">Yours</div>
-                </div>
-              </div>
-
-              {/* Two-column content */}
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
-                {/* Left */}
-                <div className="md:col-span-3 rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
-                  <div className="mb-4 flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-white"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      aria-hidden
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 11c0-1.657-1.343-3-3-3S6 9.343 6 11s1.343 3 3 3 3-1.343 3-3z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 11a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                    <h4 className="text-lg font-bold">Privacy, by design</h4>
-                  </div>
-                  <ul className="space-y-3 text-sm text-neutral-200">
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      Stored in IndexedDB on your browser — not uploaded anywhere.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      Extraction runs on a server route and returns data only to you; nothing is persisted server-side.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      Export or import your data as JSON/CSV at any time.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      Clear history in one click — full local wipe.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      No third-party analytics or tracking — your usage stays private.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      All processing is encrypted in transit (HTTPS) to ensure secure data transfer.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      No login or account required — full functionality without personal identification.
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />
-                      Open-source logic for full transparency on how your data is handled.
-                    </li>
-                  </ul>
-
-                  <div className="mt-6 rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 ring-1 ring-emerald-400/20">
-                    Tip: On-visit alerts surface deadlines due tomorrow or within the next 48 hours.
-                  </div>
-                </div>
-
-                {/* Right */}
-                <div className="md:col-span-2 flex flex-col gap-4">
-                  <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
-                    <div className="mb-3 inline-flex items-center gap-2">
-                      <svg
-                        className="h-5 w-5 text-white"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        aria-hidden
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 11V7a4 4 0 10-8 0v4m16 0V7a4 4 0 10-8 0v4"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 11h14v8a2 2 0 01-2 2H7a2 2 0 01-2-2v-8z"
-                        />
-                      </svg>
-                      <h4 className="text-lg font-bold">Local-only pledge</h4>
-                    </div>
-                    <p className="mb-4 text-sm text-neutral-200">
-                      We do not collect analytics or behavioral data from your dashboard. All insights and statuses render
-                      locally.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No tracking</div>
-                      <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No sign-ups</div>
-                      <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No ads</div>
-                      <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No selling</div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
-                    <div className="mb-3 inline-flex items-center gap-2">
-                      <svg
-                        className="h-5 w-5 text-white"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        aria-hidden
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 12l2 2 4-4M7 20h10a2 2 0 002-2V9"
-                        />
-                      </svg>
-                      <h4 className="text-lg font-bold">Control and portability</h4>
-                    </div>
-                    <p className="mb-4 text-sm text-neutral-200">
-                      Keep everything portable with one-click export and import. Perfect for backups or switching devices.
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      <span className="rounded-full bg-white/10 px-3 py-1">CSV</span>
-                      <span className="rounded-full bg-white/10 px-3 py-1">JSON</span>
-                      <span className="rounded-full bg-white/10 px-3 py-1">Local wipe</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer note */}
-              <div className="mt-8 flex items-center justify-between rounded-2xl bg-white/[0.03] px-5 py-4 ring-1 ring-white/10">
-                <div className="text-sm text-neutral-300">
-                  Your data never leaves your browser. Learn more in the Privacy Policy.
-                </div>
-                <a
-                  href="/privacy"
-                  className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15"
-                >
-                  View policy
-                </a>
-              </div>
-            </div>
-
-            {/* Clipboard watch */}
-            <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-              <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
-                <svg
-                  className="h-10 w-10 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  aria-hidden
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2" />
-                </svg>
-              </div>
-
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Clipboard watch</h3>
-              <p className="mb-6 text-base font-medium text-neutral-200">
-                Keep the tab open and we auto-capture copied job links every few seconds. Zero extra steps.
-              </p>
-
-              <div className="rounded-xl bg-white/10 px-4 py-3 text-sm text-neutral-100">Works while this tab is visible.</div>
-            </div>
-
-            {/* Export & import */}
-            <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-              <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
-                <svg
-                  className="h-10 w-10 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  aria-hidden
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v16h16M8 12h8M8 8h8M8 16h5" />
-                </svg>
-              </div>
-
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Export and import</h3>
-              <p className="mb-6 text-base font-medium text-neutral-200">
-                Download your data as CSV or JSON, and restore it in one click. Your applications stay portable.
-              </p>
-
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-white/10 px-3 py-1">CSV</span>
-                <span className="rounded-full bg-white/10 px-3 py-1">JSON</span>
-                <span className="rounded-full bg-white/10 px-3 py-1">One-click restore</span>
-              </div>
-            </div>
-
-            <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-              <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
-                <svg
-                  className="h-10 w-10 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  aria-hidden
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-
-              <h3 className="mb-3 text-3xl font-bold leading-tight">Smart Apply Reminders</h3>
-              <p className="mb-6 text-base font-medium text-neutral-200">
-                Never miss a deadline. Get alerts one day before an application closes, right in the tracker.
-              </p>
-
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-white/10 px-4 py-1">Deadline Alerts</span>
-                <span className="rounded-full bg-white/10 px-4 py-1">Color-coded Warnings</span>
-                <span className="rounded-full bg-white/10 px-4 py-1">Stay on Track</span>
-                {/* <span className="rounded-full bg-white/10 px-4 py-1">Never miss</span> */}
-              </div>
-            </div>
-          </div>
-          {/* end grid */}
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Section header */}
+        <div className="mb-24 text-center">
+          <h2 className="mb-6 text-6xl font-bold text-neutral-900 md:text-8xl">How Jobsy Works</h2>
+          <p className="mx-auto max-w-4xl text-xl font-medium text-neutral-600">
+            Simple job tracking that keeps you organized and on time.
+          </p>
         </div>
-      </section>
+
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+
+          {/* NEW — Inactive/Filled Detection (hero highlight) */}
+          <div className="lg:col-span-3 rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 flex items-start justify-between">
+              <div className="rounded-2xl bg-white/10 p-4">
+                <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                </svg>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">Time saver</span>
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">New</span>
+              </div>
+            </div>
+
+            <h3 className="mb-3 text-3xl md:text-4xl font-bold leading-tight">
+              Instantly flags inactive or filled job links before they clutter your tracker
+            </h3>
+            <p className="mb-8 max-w-4xl text-base font-medium text-neutral-200">
+              Paste a link and we auto‑detect phrases like <em>“no longer available”</em>, <em>“applications closed”</em>,
+              or <em>“position filled”</em> — and stop it from being added. You save time and keep your table clean.
+            </p>
+
+            {/* Preview strip */}
+            <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10 space-y-4">
+              <div className="rounded-xl bg-red-500/15 ring-1 ring-red-400/20 px-4 py-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-red-200">Detected: Inactive posting</div>
+                    <div className="text-sm text-red-200/90">
+                      “This specific position is <span className="font-semibold">no longer available</span>.”
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">Blocked</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="rounded-lg bg-white/10 px-3 py-2 text-center">“applications closed”</div>
+                <div className="rounded-lg bg-white/10 px-3 py-2 text-center">“no longer accepting applications”</div>
+                <div className="rounded-lg bg-white/10 px-3 py-2 text-center">“position has been filled”</div>
+              </div>
+
+              <div className="text-xs text-neutral-300">
+                Tip: You’ll see a friendly modal explaining why the link was blocked, with a quick way to open the original page.
+              </div>
+            </div>
+          </div>
+
+          {/* Auto-capture / Paste (filled version) */}
+          <div className="lg:col-span-2 rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 flex items-start justify-between">
+              <div className="rounded-2xl bg-white/10 p-4">
+                <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5h6M7 9h10M7 13h10M9 17h6" />
+                </svg>
+              </div>
+              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">Frictionless</span>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Paste the job link</h3>
+            <p className="mb-8 max-w-3xl text-base font-medium text-neutral-200">
+              Copy any job posting URL and add it to Jobsy. We extract company, role, salary, experience, and deadline
+              from major job sites and company career pages.
+            </p>
+
+            <div className="space-y-5 rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
+              <div>
+                <div className="mb-3 text-xs font-semibold text-neutral-300">Works with job boards</div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'LinkedIn','Indeed','Naukri','Foundit','Glassdoor','ZipRecruiter',
+                    'Monster','Wellfound (AngelList)','Hired','Dice','Instahyre','Freshersworld',
+                  ].map((label) => (
+                    <span key={label} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{label}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 pt-4">
+                <div className="mb-3 text-xs font-semibold text-neutral-300">ATS and company career platforms</div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'Greenhouse','Lever','Ashby','Workable','SmartRecruiters','iCIMS',
+                    'Taleo','Workday','JazzHR','BambooHR','Zoho Recruit','SAP SuccessFactors',
+                  ].map((label) => (
+                    <span key={label} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{label}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 pt-4">
+                <div className="mb-3 text-xs font-semibold text-neutral-300">Company career pages</div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'Google','Microsoft','Amazon','Netflix','Stripe','Airbnb','Shopify',
+                    'Adobe','Atlassian','Uber','Flipkart','Swiggy','Zomato','TCS','Infosys',
+                  ].map((label) => (
+                    <span key={label} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{label}</span>
+                  ))}
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">+ Many more</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Smart extraction */}
+          <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
+              <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Smart job details</h3>
+            <p className="mb-6 text-base font-medium text-neutral-200">
+              Our extractor reads the posting and standardizes key fields so your table stays clean and consistent.
+            </p>
+
+            <ul className="space-y-3 text-sm text-neutral-200">
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-white" />Company and role</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-white" />Job location</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-white" />Salary range and currency</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-white" />Experience required</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-white" />Application deadline</li>
+            </ul>
+
+            <div className="mt-6 rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 ring-1 ring-emerald-400/20">
+              Accurate parsing first; AI fallback only when details are missing.
+            </div>
+          </div>
+
+          {/* Reminders */}
+          <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
+              <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Smart alerts</h3>
+            <p className="mb-6 text-base font-medium text-neutral-200">
+              See due-soon and overdue banners whenever you visit. Enable browser notifications to get reminded one day
+              before deadlines.
+            </p>
+
+            <div className="space-y-3">
+              <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
+                Due in 2 days: Software Engineer @ Mindtree.
+              </div>
+              <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
+                Overdue: Product Designer @ Persistent Systems closed yesterday.
+              </div>
+              <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
+                Overdue: Backend Developer @ Hexaware closed yesterday.
+              </div>
+              <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
+                Overdue: QA Engineer @ Birlasoft closed yesterday.
+              </div>
+              <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
+                Due in 2 days: Software Engineer @ Zensar Technologies.
+              </div>
+              <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
+                Overdue: UI Developer @ Sonata Software closed yesterday.
+              </div>
+              <div className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
+                Overdue: Support Engineer @ Mphasis closed yesterday.
+              </div>
+              <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
+                Due in 2 days: Associate Developer @ L&T Infotech.
+              </div>
+              <div className="rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-400/20">
+                Due in 2 days: Software Engineer @ Happiest Minds.
+              </div>
+            </div>
+          </div>
+
+          {/* Privacy / Local-only */}
+          <div id="privacy" className="lg:col-span-2 rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 flex items-start justify-between">
+              <div className="rounded-2xl bg-white/10 p-4">
+                <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M5 12a7 7 0 1014 0 7 7 0 00-14 0z" />
+                </svg>
+              </div>
+              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">100% Private • Local-only</span>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Track everything locally</h3>
+            <p className="mb-8 max-w-3xl text-base font-medium text-neutral-200">
+              Your application data stays on your device. No accounts, no cloud sync, no data mining. Update status
+              with one click and keep a clean audit trail.
+            </p>
+
+            <div className="mb-8 grid grid-cols-3 gap-4">
+              <div className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
+                <div className="text-2xl font-bold">0</div>
+                <div className="text-xs text-neutral-300">Accounts</div>
+              </div>
+              <div className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
+                <div className="text-2xl font-bold">0</div>
+                <div className="text-xs text-neutral-300">Servers</div>
+              </div>
+              <div className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
+                <div className="text-2xl font-bold">100%</div>
+                <div className="text-xs text-neutral-300">Yours</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+              <div className="md:col-span-3 rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
+                <div className="mb-4 flex items-center gap-2">
+                  <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0-1.657-1.343-3-3-3S6 9.343 6 11s1.343 3 3 3 3-1.343 3-3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <h4 className="text-lg font-bold">Privacy, by design</h4>
+                </div>
+                <ul className="space-y-3 text-sm text-neutral-200">
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />Stored in IndexedDB on your browser — not uploaded anywhere.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />Extraction runs on a server route and returns data only to you; nothing is persisted server-side.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />Export or import your data as JSON/CSV at any time.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />Clear history in one click — full local wipe.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />No third-party analytics or tracking — your usage stays private.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />All processing is encrypted in transit (HTTPS) to ensure secure data transfer.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />No login or account required — full functionality without personal identification.</li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-white" />Open-source logic for full transparency on how your data is handled.</li>
+                </ul>
+
+                <div className="mt-6 rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 ring-1 ring-emerald-400/20">
+                  Tip: On-visit alerts surface deadlines due tomorrow or within the next 48 hours.
+                </div>
+              </div>
+
+              <div className="md:col-span-2 flex flex-col gap-4">
+                <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
+                  <div className="mb-3 inline-flex items-center gap-2">
+                    <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11V7a4 4 0 10-8 0v4m16 0V7a4 4 0 10-8 0v4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 11h14v8a2 2 0 01-2 2H7a2 2 0 01-2-2v-8z" />
+                    </svg>
+                    <h4 className="text-lg font-bold">Local-only pledge</h4>
+                  </div>
+                  <p className="mb-4 text-sm text-neutral-200">
+                    We do not collect analytics or behavioral data from your dashboard. All insights and statuses render locally.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No tracking</div>
+                    <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No sign-ups</div>
+                    <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No ads</div>
+                    <div className="rounded-lg bg-white/10 px-3 py-2 text-center">No selling</div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
+                  <div className="mb-3 inline-flex items-center gap-2">
+                    <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7 20h10a2 2 0 002-2V9" />
+                    </svg>
+                    <h4 className="text-lg font-bold">Control and portability</h4>
+                  </div>
+                  <p className="mb-4 text-sm text-neutral-200">
+                    Keep everything portable with one-click export and import. Perfect for backups or switching devices.
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="rounded-full bg-white/10 px-3 py-1">CSV</span>
+                    <span className="rounded-full bg-white/10 px-3 py-1">JSON</span>
+                    <span className="rounded-full bg-white/10 px-3 py-1">Local wipe</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer note */}
+            <div className="mt-8 flex items-center justify-between rounded-2xl bg-white/[0.03] px-5 py-4 ring-1 ring-white/10">
+              <div className="text-sm text-neutral-300">
+                Your data never leaves your browser. Learn more in the Privacy Policy.
+              </div>
+              <a
+                href="/privacy"
+                className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15"
+              >
+                View policy
+              </a>
+            </div>
+          </div>
+
+          {/* Clipboard watch */}
+          <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
+              <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2" />
+              </svg>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Clipboard watch</h3>
+            <p className="mb-6 text-base font-medium text-neutral-200">
+              Keep the tab open and we auto-capture copied job links every few seconds. Zero extra steps.
+            </p>
+
+            <div className="rounded-xl bg-white/10 px-4 py-3 text-sm text-neutral-100">Works while this tab is visible.</div>
+          </div>
+
+          {/* Export & import */}
+          <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
+              <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v16h16M8 12h8M8 8h8M8 16h5" />
+              </svg>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Export and import</h3>
+            <p className="mb-6 text-base font-medium text-neutral-200">
+              Download your data as CSV or JSON, and restore it in one click. Your applications stay portable.
+            </p>
+
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="rounded-full bg-white/10 px-3 py-1">CSV</span>
+              <span className="rounded-full bg-white/10 px-3 py-1">JSON</span>
+              <span className="rounded-full bg-white/10 px-3 py-1">One-click restore</span>
+            </div>
+          </div>
+
+          {/* Smart Apply Reminders */}
+          <div className="rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
+            <div className="mb-8 inline-flex rounded-2xl bg-white/10 p-4">
+              <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <h3 className="mb-3 text-3xl font-bold leading-tight">Smart Apply Reminders</h3>
+            <p className="mb-6 text-base font-medium text-neutral-200">
+              Never miss a deadline. Get alerts one day before an application closes, right in the tracker.
+            </p>
+
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="rounded-full bg-white/10 px-4 py-1">Deadline Alerts</span>
+              <span className="rounded-full bg-white/10 px-4 py-1">Color-coded Warnings</span>
+              <span className="rounded-full bg-white/10 px-4 py-1">Stay on Track</span>
+            </div>
+          </div>
+        </div>
+        {/* end grid */}
+      </div>
+    </section>
+
 
       {/* Step-by-Step Process */}
       <section id="how-it-works" className="py-32 bg-white">
