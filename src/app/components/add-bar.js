@@ -178,41 +178,79 @@ export default function AddBar() {
     detectedPattern: ''
   });
 
-  async function addFromUrl(u) {
-    setIsLoading(true);
-    try {
-      const r = await fetch('/api/extract?url=' + encodeURIComponent(u));
-      const data = await r.json();
+  // 1) Replace your addFromUrl with this
+async function addFromUrl(u) {
+  setIsLoading(true);
+  try {
+    const r = await fetch('/api/extract?url=' + encodeURIComponent(u));
+    let data = null;
+    try { data = await r.json(); } catch { /* no body or not JSON */ }
 
-      if (r.status === 422 && data.type === 'job_filled') {
-        setJobFilledAlert({
-          isVisible: true,
-          jobUrl: data.url || u,
-          detectedPattern: data.detectedPattern || ''
-        });
-        return;
-      }
-      if (!r.ok) throw new Error(data.error || 'Failed to fetch');
-
-      window.dispatchEvent(new CustomEvent('jobs:add', { detail: data }));
-      toast.success('Job added.');
-      setUrl('');
-    } catch (e) {
-      console.error('Error adding job:', e);
-      toast.error('Could not add this URL');
-    } finally {
-      setIsLoading(false);
+    // Special-case: job filled (your existing flow)
+    if (r.status === 422 && data?.type === 'job_filled') {
+      setJobFilledAlert({
+        isVisible: true,
+        jobUrl: data.url || u,
+        detectedPattern: data.detectedPattern || ''
+      });
+      return; // handled; don't throw
     }
-  }
 
-  function looksJobLike(urlStr) {
-    try {
-      const u = new URL(urlStr);
-      const host = u.hostname.replace(/^www\./, '');
-      if (host.includes('youtube.') || host.includes('google.')) return false;
-      return true;
-    } catch { return false; }
+    // Graceful user-facing handling for other non-OK responses
+    if (!r.ok) {
+      // Map a few common cases to better messages
+      const msg =
+        data?.error ||
+        (r.status === 400 ? 'That doesn’t look like a job posting link.' :
+         r.status === 404 ? 'We couldn’t load that page.' :
+         r.status === 429 ? 'You’re going too fast. Try again in a moment.' :
+         r.status >= 500 ? 'Server had a hiccup. Try again.' :
+         'Could not add this URL');
+
+      toast.error(msg);
+      return; // important: don't throw -> no scary console error
+    }
+
+    // Success
+    window.dispatchEvent(new CustomEvent('jobs:add', { detail: data }));
+    toast.success('Job added.');
+    setUrl('');
+  } catch (e) {
+    // Network/unknown failures
+    console.error('Error adding job:', e);
+    toast.error('Network error while adding this URL');
+  } finally {
+    setIsLoading(false);
   }
+}
+
+  // 2) Replace looksJobLike with this (still lightweight, but smarter)
+function looksJobLike(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    const host = u.hostname.replace(/^www\./, '');
+
+    // obvious non-job sites
+    if (/(^|\.)youtube\.|(^|\.)google\./i.test(host)) return false;
+
+    // common applicant tracking + career hosts
+    const jobHosts = [
+      'lever.co', 'greenhouse.io', 'workday.com', 'ashbyhq.com',
+      'smartrecruiters.com', 'icims.com', 'jobvite.com', 'bamboohr.com',
+      'myworkdayjobs.com', 'eightfold.ai', 'freshteam.com', 'recruitee.com',
+      'applytojob.com', 'successfactors.com', 'oraclecloud.com'
+    ];
+    if (jobHosts.some(h => host.endsWith(h))) return true;
+
+    // typical job path hints for company domains
+    const p = (u.pathname + u.search).toLowerCase();
+    const joby = /(job|jobs|careers|career|opening|positions|vacancy|apply)/i.test(p);
+    return joby;
+  } catch {
+    return false;
+  }
+}
+
 
   async function handleAdd() {
     if (!url || isLoading) return;

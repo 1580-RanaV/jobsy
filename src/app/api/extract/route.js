@@ -28,14 +28,69 @@ const OutSchema = z.object({
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
+// Enhanced list of job platforms and ATS systems that should be allowed
+const ALLOWED_JOB_PLATFORMS = new Set([
+  'naukri.com',
+  'linkedin.com',
+  'indeed.com',
+  'glassdoor.com',
+  'monster.com',
+  'shine.com',
+  'timesjobs.com',
+  'foundit.in', // formerly monster.in
+  'instahyre.com',
+  'angellist.com',
+  'wellfound.com',
+  'stackoverflow.com',
+  'dice.com',
+  'zip-recruiter.com',
+  'careerbuilder.com',
+  'simplyhired.com',
+  'jobstreet.com',
+  'seek.com',
+  'smartrecruiters.com',
+  'workday.com',
+  'successfactors.com',
+  'oracle.com',
+  'taleo.net',
+  'icims.com',
+  'greenhouse.io',
+  'lever.co',
+  'bamboohr.com',
+  'recruitee.com',
+  'personio.com',
+  'breezy.hr',
+  'crelate.com',
+  'eightfold.ai',
+  'myworkday.com',
+  'myworkdayjobs.com',
+  'oracle-jobs.com',
+  'oraclecloud.com',
+  'successfactors.eu',
+  'successfactors.com',
+  'sap.com',
+  'cornerstonedemand.com',
+  'ultipro.com',
+  'adp.com',
+  'ceridian.com',
+  'paychex.com',
+  'paycom.com',
+  'paylocity.com',
+  'namely.com',
+  'zenefits.com',
+  'gusto.com',
+  'rippling.com',
+  'hibob.com'
+]);
+
 // Enhanced company name extraction from domain
-function extractCompanyFromDomain(hostname) {
+function extractCompanyFromDomain(hostname, fullUrl = '') {
   const parsed = parseDomain(hostname);
   const domain = parsed.domain;
   
   if (!domain) return '';
   
-  // Common domain-to-company mappings
+  // Common domain-to-company mappings (enhanced)
   const domainMappings = {
     'google': 'Google',
     'microsoft': 'Microsoft',
@@ -111,6 +166,18 @@ function extractCompanyFromDomain(hostname) {
     'delhivery': 'Delhivery'
   };
 
+  // Extract company from URL path for job platforms
+  if (isJobPlatformDomain(hostname)) {
+    console.log('Detected job platform domain:', hostname);
+    
+    // Try to extract company from URL path
+    const pathCompany = extractCompanyFromJobPlatformUrl(fullUrl, hostname);
+    if (pathCompany) {
+      console.log('Extracted company from job platform URL:', pathCompany);
+      return pathCompany;
+    }
+  }
+
   // Direct mapping
   const lowerDomain = domain.toLowerCase();
   if (domainMappings[lowerDomain]) {
@@ -142,6 +209,97 @@ function extractCompanyFromDomain(hostname) {
   return cleanName || domain;
 }
 
+// Check if domain is a job platform
+function isJobPlatformDomain(hostname) {
+  return [...ALLOWED_JOB_PLATFORMS].some(platform => 
+    hostname.includes(platform) || platform.includes(hostname)
+  );
+}
+
+// Extract company name from job platform URLs
+function extractCompanyFromJobPlatformUrl(fullUrl, hostname) {
+  try {
+    const url = new URL(fullUrl);
+    const path = url.pathname;
+    const searchParams = url.searchParams;
+
+    // Naukri.com patterns
+    if (hostname.includes('naukri.com')) {
+      // Pattern: /company-name-jobs
+      const naukriMatch = path.match(/\/([^\/]+)-jobs/);
+      if (naukriMatch) {
+        return naukriMatch[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+      
+      // Pattern: company parameter
+      const companyParam = searchParams.get('company');
+      if (companyParam) {
+        return companyParam.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    }
+
+    // LinkedIn patterns
+    if (hostname.includes('linkedin.com')) {
+      // Pattern: /company/company-name/jobs
+      const linkedinMatch = path.match(/\/company\/([^\/]+)/);
+      if (linkedinMatch) {
+        return linkedinMatch[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    }
+
+    // Indeed patterns
+    if (hostname.includes('indeed.com')) {
+      const companyParam = searchParams.get('cmp');
+      if (companyParam) {
+        return companyParam.replace(/\+/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    }
+
+    // Oracle Cloud/Taleo patterns
+    if (hostname.includes('oracle') || hostname.includes('taleo')) {
+      // Often has company in subdomain or path
+      const oracleMatch = hostname.match(/([^\.]+)\.(?:oracle|taleo)/);
+      if (oracleMatch && oracleMatch[1] !== 'www' && oracleMatch[1] !== 'jobs') {
+        return oracleMatch[1].replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    }
+
+    // Workday patterns
+    if (hostname.includes('myworkday') || hostname.includes('workday')) {
+      // Pattern: company.myworkday.com or company-myworkday.com
+      const workdayMatch = hostname.match(/([^\.]+)\.(?:myworkday|workday)/);
+      if (workdayMatch && workdayMatch[1] !== 'www' && workdayMatch[1] !== 'jobs') {
+        return workdayMatch[1].replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    }
+
+    // SuccessFactors patterns
+    if (hostname.includes('successfactors')) {
+      const sfMatch = hostname.match(/([^\.]+)\.successfactors/);
+      if (sfMatch && sfMatch[1] !== 'www' && sfMatch[1] !== 'jobs') {
+        return sfMatch[1].replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    }
+
+    // Generic subdomain extraction for ATS systems
+    if (isJobPlatformDomain(hostname)) {
+      const subdomainMatch = hostname.match(/([^\.]+)\./);
+      if (subdomainMatch && subdomainMatch[1] !== 'www' && subdomainMatch[1] !== 'jobs' && subdomainMatch[1] !== 'careers') {
+        const potential = subdomainMatch[1].replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        // Check if it looks like a company name (not too generic)
+        if (potential.length > 2 && !['Jobs', 'Careers', 'Apply', 'Www'].includes(potential)) {
+          return potential;
+        }
+      }
+    }
+
+  } catch (e) {
+    console.log('Error parsing job platform URL:', e.message);
+  }
+  
+  return '';
+}
+
 // Check if text looks like a job title rather than company name
 function looksLikeJobTitle(text) {
   const jobTitlePatterns = [
@@ -154,8 +312,41 @@ function looksLikeJobTitle(text) {
   return jobTitlePatterns.some(pattern => pattern.test(text));
 }
 
-// Enhanced company name extraction from page content
-function extractCompanyFromPage($, hostname) {
+// Enhanced company name extraction from page content with job platform awareness
+function extractCompanyFromPage($, hostname, fullUrl) {
+  // Special handling for job platforms
+  if (isJobPlatformDomain(hostname)) {
+    console.log('Using job platform-specific extraction for:', hostname);
+    
+    // Job platform specific selectors
+    const jobPlatformSelectors = [
+      // Naukri
+      '.companyName a', '.company-name a', '.comp-name', '.comp-dtls h2',
+      // LinkedIn
+      '.jobs-unified-top-card__company-name', '.job-details-jobs-unified-top-card__company-name',
+      // Indeed
+      '.jobsearch-InlineCompanyRating a', '.jobsearch-CompanyReview--heading',
+      // Generic job platforms
+      '[data-company-name]', '.employer-name', '.hiring-company', '.company-title',
+      '.job-company', '.company-info .name', '.recruiter-name'
+    ];
+
+    for (const selector of jobPlatformSelectors) {
+      try {
+        const element = $(selector).first();
+        if (element.length) {
+          let text = element.text().trim();
+          if (text && text.length > 1 && text.length < 80 && !looksLikeJobTitle(text)) {
+            console.log('Company found via job platform selector:', selector, '→', text);
+            return text;
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+  }
+
   // Priority order selectors - most specific first
   const highPrioritySelectors = [
     // Direct company data attributes
@@ -275,18 +466,49 @@ function extractCompanyFromPage($, hostname) {
 }
 
 // Enhanced company extraction function
-function enhancedCompanyFrom($, hostname) {
+function enhancedCompanyFrom($, hostname, fullUrl) {
   // First try to extract from page content
-  const fromPage = extractCompanyFromPage($, hostname);
+  const fromPage = extractCompanyFromPage($, hostname, fullUrl);
   if (fromPage) {
     console.log('Company extracted from page:', fromPage);
     return fromPage;
   }
 
-  // Fallback to domain extraction
-  const fromDomain = extractCompanyFromDomain(hostname);
-  console.log('Company extracted from domain:', fromDomain);
+  // Fallback to domain/URL extraction
+  const fromDomain = extractCompanyFromDomain(hostname, fullUrl);
+  console.log('Company extracted from domain/URL:', fromDomain);
   return fromDomain;
+}
+
+// Enhanced platform detection
+function isAcceptableJobPlatform(hostname, pageText, $) {
+  // Check if it's a known job platform
+  if (isJobPlatformDomain(hostname)) {
+    console.log('Accepted as known job platform:', hostname);
+    return true;
+  }
+
+  // Check for job platform indicators in content
+  const platformIndicators = [
+    /apply now|apply today|submit application|start application/i,
+    /job description|job details|job summary/i,
+    /years? of experience|experience required/i,
+    /salary|compensation|ctc|package/i,
+    /location|work location|job location/i,
+    /qualifications|requirements|skills required/i,
+    /deadline|last date|apply before/i
+  ];
+
+  const indicatorCount = platformIndicators.reduce((count, pattern) => {
+    return count + (pattern.test(pageText) ? 1 : 0);
+  }, 0);
+
+  if (indicatorCount >= 3) {
+    console.log('Accepted based on job content indicators, count:', indicatorCount);
+    return true;
+  }
+
+  return false;
 }
 
 // Enhanced salary extraction with debugging
@@ -427,17 +649,27 @@ export async function GET(req) {
     const parsed = parseDomain(u.hostname);
     const root = parsed.domain ? `${parsed.domain}.${parsed.publicSuffix}` : u.hostname;
 
-    if (BLOCKED_DOMAINS.has(root)) {
+    // Modified blocking logic - be more lenient with job platforms
+    if (BLOCKED_DOMAINS.has(root) && !isJobPlatformDomain(u.hostname)) {
       return NextResponse.json({ 
-        error: 'LinkedIn and other job aggregators require authentication. Please use the direct company career page URL instead.' 
+        error: 'This domain is blocked. Please use the direct company career page URL instead.' 
       }, { status: 400 });
     }
-    if (AGGREGATOR_BLOCK.has(root)) {
+
+    // Only block obvious aggregators, not legitimate job platforms
+    if (AGGREGATOR_BLOCK.has(root) && !isJobPlatformDomain(u.hostname)) {
       return NextResponse.json({ error: 'Use the original company/ATS posting' }, { status: 400 });
     }
 
-    const isATS = [...ATS_ALLOW].some((d) => root.endsWith(d));
+    const isATS = [...ATS_ALLOW].some((d) => root.endsWith(d)) || isJobPlatformDomain(u.hostname);
     const isCareer = looksLikeCareerDomain(u.hostname);
+
+    console.log('=== URL ANALYSIS ===');
+    console.log('URL:', target);
+    console.log('Root domain:', root);
+    console.log('isJobPlatformDomain:', isJobPlatformDomain(u.hostname));
+    console.log('isATS:', isATS);
+    console.log('isCareer:', isCareer);
 
     const resp = await fetch(target, {
       headers: { 
@@ -534,6 +766,7 @@ export async function GET(req) {
       }, { status: 422 });
     }
 
+    // Enhanced job posting detection
     const hasApply =
       APPLY_SELECTORS.some((sel) => {
         try {
@@ -549,15 +782,19 @@ export async function GET(req) {
       }) || /apply now|apply today|submit application|start application/i.test(pageText);
     
     console.log('hasApply:', hasApply);
-    console.log('Final check - isATS || isCareer || hasApply:', isATS || isCareer || hasApply);
+    
+    // Use enhanced platform detection
+    const isAcceptablePlatform = isAcceptableJobPlatform(u.hostname, pageText, $);
+    console.log('isAcceptablePlatform:', isAcceptablePlatform);
+    console.log('Final check - isATS || isCareer || hasApply || isAcceptablePlatform:', isATS || isCareer || hasApply || isAcceptablePlatform);
 
-    if (!(isATS || isCareer || hasApply)) {
+    if (!(isATS || isCareer || hasApply || isAcceptablePlatform)) {
       console.log('Blocked: Not recognized as job posting');
       return NextResponse.json({ error: 'Not a job posting link' }, { status: 400 });
     }
 
-    // Extract using enhanced company extraction
-    let company = enhancedCompanyFrom($, u.hostname);
+    // Extract using enhanced company extraction with full URL
+    let company = enhancedCompanyFrom($, u.hostname, target);
     let role = roleFrom($);
     let location = locationFrom($);
     
@@ -577,18 +814,24 @@ export async function GET(req) {
     console.log('ExperienceText:', JSON.stringify(experienceText));
     console.log('DeadlineText:', JSON.stringify(deadlineText));
 
-    // GROQ fallback only if needed
+    // Enhanced GROQ fallback with better prompting for job platforms
     if (!company || !role || !location || !salaryText || !experienceText || !deadlineText) {
       console.log('\n=== GROQ FALLBACK TRIGGERED ===');
       console.log('Missing fields - Company:', !company, 'Role:', !role, 'Location:', !location, 'Salary:', !salaryText, 'Experience:', !experienceText, 'Deadline:', !deadlineText);
       
       try {
         const groq = groqClient();
-        const sys =
-          'You are a strict information extractor for job postings. Extract ONLY the company name, not job titles or roles. Return ONLY a valid JSON object with no markdown formatting, no code blocks, no explanations. Just pure JSON starting with { and ending with }. Do not invent dates that are not present. If a field does not exist, set it to "". For company field: extract only the actual company/employer name (like "Google", "Microsoft", "Infosys"), NOT job titles, roles, or positions (avoid terms like "Engineer", "Developer", "Manager", "Analyst", etc.).';
+        const isJobPlatform = isJobPlatformDomain(u.hostname);
+        
+        const sys = `You are a strict information extractor for job postings. Extract ONLY the company name, not job titles or roles. Return ONLY a valid JSON object with no markdown formatting, no code blocks, no explanations. Just pure JSON starting with { and ending with }.
+
+${isJobPlatform ? 'IMPORTANT: This is from a job platform (like Naukri, LinkedIn, Indeed, etc.). The actual hiring company will be mentioned in the job description, not the platform name. Extract the real company that is hiring.' : ''}
+
+Do not invent dates that are not present. If a field does not exist, set it to "". For company field: extract only the actual company/employer name (like "Google", "Microsoft", "Infosys"), NOT job titles, roles, or positions (avoid terms like "Engineer", "Developer", "Manager", "Analyst", etc.).`;
+
         const prompt = `
 Extract from this job posting:
-- company (ONLY the company/employer name like "Google", "Infosys", "Microsoft" - NOT job titles or roles)
+- company (ONLY the company/employer name like "Google", "Infosys", "Microsoft" - NOT job titles or roles${isJobPlatform ? '. This is from a job platform, so find the actual hiring company, not the platform name.' : ''})
 - role (job title/position)
 - location (e.g., "Bengaluru, India")
 - experienceText (e.g., "2–4 years" or "")
@@ -598,8 +841,10 @@ Extract from this job posting:
 
 IMPORTANT: For "company" field, extract ONLY the employer/organization name. Do NOT include job titles, positions, or roles.
 IMPORTANT: For "salaryText" field, extract the COMPLETE salary information, not just currency symbols like "rs," or "₹".
+${isJobPlatform ? 'IMPORTANT: This URL is from a job platform. Look for the actual company that posted the job, not the platform name.' : ''}
 
 URL: ${target}
+Platform: ${u.hostname}
 
 Text:
 """${pageText.slice(0, 16000)}"""
@@ -632,8 +877,8 @@ Text:
         const j = JSON.parse(cleanJson);
         console.log('GROQ parsed JSON:', j);
 
-        // Use GROQ company name if our extraction failed or returned generic terms
-        if (!company || /^(careers?|jobs?|hiring|work|employment)$/i.test(company)) {
+        // Use GROQ results with better validation
+        if (!company || /^(careers?|jobs?|hiring|work|employment|naukri|linkedin|indeed)$/i.test(company)) {
           company = j.company || company;
         }
         role ||= j.role || '';
