@@ -12,13 +12,13 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
   if (!isVisible) return null;
 
   const patterns = [
-    { pattern: '/job.*has been filled/i', description: 'Detects "job has been filled" variations' },
-    { pattern: '/position.*no longer available/i', description: 'Catches "position no longer available"' },
+    { pattern: '/job.*has been filled/i', description: 'Detects &quot;job has been filled&quot; variations' },
+    { pattern: '/position.*no longer available/i', description: 'Catches &quot;position no longer available&quot;' },
     { pattern: '/posting.*expired/i', description: 'Identifies expired job postings' },
     { pattern: '/application.*closed/i', description: 'Finds closed application notices' },
     { pattern: '/sorry.*job.*filled/i', description: 'Matches apologetic filled job messages' },
-    { pattern: '/this position is no longer accepting applications/i', description: 'Direct "no longer accepting" statements' },
-    { pattern: "/we're sorry.*this specific position is no longer available/i", description: 'Mastercard-style unavailable messages' },
+    { pattern: '/this position is no longer accepting applications/i', description: 'Direct &quot;no longer accepting&quot; statements' },
+    { pattern: "/we\\'re sorry.*this specific position is no longer available/i", description: 'Mastercard-style unavailable messages' },
     { pattern: '/this job is no longer active/i', description: 'Job no longer active notices' },
     { pattern: '/position has been closed/i', description: 'Position closed announcements' },
     { pattern: '/applications are no longer being accepted/i', description: 'Applications no longer accepted' },
@@ -90,7 +90,7 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
                 <div className="text-sm text-white/80 space-y-3">
                   <p>
                     <strong className="text-white">How Detection Works:</strong> We parse the page content and scan for
-                    common "position closed" patterns.
+                    common &quot;position closed&quot; patterns.
                   </p>
 
                   <div className="bg-black rounded-2xl p-3 border border-neutral-800">
@@ -217,7 +217,7 @@ export default function AddBar() {
   async function handleAdd() {
     if (!url || isLoading) return;
     if (!looksJobLike(url)) {
-      toast.error('That doesnt look like a job posting URL');
+      toast.error("That doesn't look like a job posting URL");
       return;
     }
     await addFromUrl(url);
@@ -356,7 +356,7 @@ export default function AddBar() {
                 'inline-flex items-center justify-center',
                 'h-10 sm:h-11 md:h-12 px-4 rounded-full',
                 'text-xs sm:text-sm font-medium tracking-tight',
-                'bg-neutral-800 text-white border border-neutral-800', // ✅ bg-gray-700 as requested
+                'bg-neutral-800 text-white border border-neutral-800',
                 'hover:bg-gray-600 transition',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-800',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
