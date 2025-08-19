@@ -25,7 +25,7 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 space-y-4">
         <AlertsStack jobs={jobs} />
 
-        <div className="p-4 md:p-5 bg-black rounded-4xl mt-6">
+        <div className="p-4 md:p-5 bg-black rounded-4xl mt-16">
           <AddBar />
         </div>
 
