@@ -2,10 +2,10 @@
 export default function SectionHeader() {
   return (
     <div className="mb-24 text-center">
-      <h2 className="mb-6 text-6xl font-bold text-neutral-900 md:text-8xl">
+      <h2 className="mb-6 text-4xl font-bold text-neutral-900 md:text-8xl">
         How Jobsy Works
       </h2>
-      <p className="mx-auto max-w-4xl text-xl font-medium text-neutral-600">
+      <p className="mx-auto max-w-4xl text-xs sm:text-base lg:text-lg font-medium text-neutral-600">
         Simple job tracking that keeps you organized and on time.
       </p>
     </div>

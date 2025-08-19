@@ -8,11 +8,11 @@ const CTA = () => {
         <div className="max-w-5xl mx-auto px-6 lg:px-8 rounded-3xl">
           <div className="rounded-3xl ring-1 ring-white/10 shadow-2xl bg-black p-12 text-center">
             {/* Heading */}
-            <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
+            <h2 className="text-5xl leading-none md:text-7xl font-bold text-white mb-6">
               Ready to land <br className="hidden sm:block" /> your next job?
             </h2>
             <p className="text-xl md:text-xl text-neutral-300 font-medium tracking-tighter max-w-3xl mx-auto mb-12">
-              Start tracking your job applications in just 10 seconds — no signup, no hassle.
+              Start tracking your job applications in just 10 seconds <br></br>—<br></br> no signup, no hassle.
             </p>
 
             {/* CTA */}

@@ -8,7 +8,7 @@ const ThreeStep = () => {
             <div className="rounded-3xl bg-neutral-950 p-10 text-white shadow-2xl ring-1 ring-white/10">
               {/* Header */}
               <div className="mb-14 text-center">
-                <h2 className="mb-4 text-6xl font-bold md:text-8xl">Three Steps to Success</h2>
+                <h2 className="mb-4 text-4xl font-bold md:text-8xl">Three Steps to Success</h2>
                 <p className="mx-auto max-w-3xl text-base font-medium text-neutral-300">
                   From job link to job offer in the simplest way possible.
                 </p>

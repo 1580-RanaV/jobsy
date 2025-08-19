@@ -13,13 +13,16 @@ export default function PrivacyFocus() {
           {[
             ["0", "Cloud uploads"],
             ["0", "Data selling"],
-            ["0", "Sign-ups"],
-            ["100%", "Local"],
+            ["0", "SignUp"],
+            ["Full", "Local"],
           ].map(([n, label]) => (
-            <div key={label} className="rounded-2xl bg-white/[0.04] p-6 text-center ring-1 ring-white/10">
-              <div className="text-2xl font-bold">{n}</div>
-              <div className="text-xs text-neutral-300">{label}</div>
-            </div>
+            <div
+            key={label}
+            className="rounded-2xl bg-white/[0.04] p-6 text-center ring-1 ring-white/10"
+          >
+            <div className="text-2xl font-bold">{n}</div>
+            <div className="text-xs sm:text-sm lg:text-lg text-neutral-300">{label}</div>
+          </div>
           ))}
         </div>
 

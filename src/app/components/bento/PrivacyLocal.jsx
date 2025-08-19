@@ -12,14 +12,28 @@ export default function PrivacyLocal() {
   ]
   return (
     <div id="privacy" className="lg:col-span-2 rounded-3xl bg-neutral-950 p-12 text-white shadow-2xl ring-1 ring-white/10">
-      <div className="mb-8 flex items-start justify-between">
-        <div className="rounded-2xl bg-white/10 p-4">
+      <div className="mb-8 relative">
+    <div className="flex items-start justify-between">
+      {/* Left: icon + mobile badge */}
+      <div>
+        <div className="rounded-2xl bg-white/10 p-4 inline-flex">
           <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M5 12a7 7 0 1014 0 7 7 0 00-14 0z" />
           </svg>
         </div>
-        <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">100% Private • Local-only</span>
+<br></br>
+        {/* Mobile badge (under icon) */}
+        <span className="mt-4 inline-flex sm:hidden rounded-full bg-white/10 px-4 py-3 text-xs font-semibold leading-none whitespace-nowrap">
+          100% Private • Local-only
+        </span>
       </div>
+
+      {/* Desktop/Tablet badge (top-right) */}
+      <span className="hidden sm:inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-semibold whitespace-nowrap">
+        100% Private • Local-only
+      </span>
+    </div>
+  </div>
 
       <h3 className="mb-3 text-3xl font-bold leading-tight">Track everything locally</h3>
       <p className="mb-8 max-w-3xl text-base font-medium text-neutral-200">

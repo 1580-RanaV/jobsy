@@ -19,22 +19,56 @@ export default function InactiveDetection() {
         }}
       />
 
-      <div className="mb-8 flex items-start justify-between relative">
-        <div className="rounded-2xl bg-white/10 p-4">
-          <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M12 2a10 10 0 100 20 10 10 0 000-20z" />
-          </svg>
-        </div>
+      {/* Header */}
+      <div className="mb-8 relative">
+        <div className="flex items-start justify-between">
+          {/* Left: icon + (mobile) badges underneath */}
+          <div>
+            <div className="rounded-2xl bg-white/10 p-4 inline-flex">
+              <svg
+                className="h-10 w-10 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M12 2a10 10 0 100 20 10 10 0 000-20z"
+                />
+              </svg>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <span className="relative inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">
-            <span className="relative inline-flex">
-              <span className="motion-safe:animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+            {/* Mobile badges (stacked under icon) */}
+            <div className="mt-2 flex sm:hidden items-center gap-2">
+              <span className="inline-flex items-center mt-4 gap-2 rounded-full bg-white/10 px-4 py-3 text-[10px] font-semibold leading-none whitespace-nowrap">
+                <span className="relative inline-flex">
+                  <span className="motion-safe:animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                Time saver
+              </span>
+              <span className="rounded-full mt-4 bg-white/10 px-4 py-3 text-[10px] font-semibold leading-none whitespace-nowrap">
+                New
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop/Tablet badges (right side) */}
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="relative inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold whitespace-nowrap">
+              <span className="relative inline-flex">
+                <span className="motion-safe:animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+              </span>
+              Time saver
             </span>
-            Time saver
-          </span>
-          <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold">New</span>
+            <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold whitespace-nowrap">
+              New
+            </span>
+          </div>
         </div>
       </div>
 

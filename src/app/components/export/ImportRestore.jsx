@@ -13,10 +13,10 @@ export default function ImportRestore() {
             Import & <br /> restore
           </h3>
         </div>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">One click</span>
       </div>
+      <span className="rounded-full bg-white/10 px-4 py-3 text-xs font-semibold">One click</span>
 
-      <p className="mb-5 text-sm font-medium text-neutral-200">
+      <p className="mb-5 mt-6 text-sm font-medium text-neutral-200">
         Move devices or recover history instantly. Import CSV or JSON and continue where you left off.
       </p>
 

@@ -9,7 +9,7 @@ export default function ExportCSV() {
           </span>
           <h3 className="text-2xl font-bold leading-tight">Export as CSV</h3>
         </div>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">Spreadsheets</span>
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">Excel</span>
       </div>
 
       <p className="mb-5 text-sm font-medium text-neutral-200">
