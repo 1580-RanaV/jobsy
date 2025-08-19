@@ -2,12 +2,13 @@
 'use client';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { AlertTriangle, X, ChevronDown, ChevronUp, Code, Loader2 } from 'lucide-react';
+import { AlertTriangle, X, ChevronDown, ChevronUp, Code, Loader2, ExternalLink } from 'lucide-react';
 
-// Job Filled Alert Component
+/* -----------------------------
+   Job Filled Alert (Dark Bento)
+------------------------------*/
 function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
   const [showDetails, setShowDetails] = useState(false);
-
   if (!isVisible) return null;
 
   const patterns = [
@@ -17,33 +18,40 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
     { pattern: '/application.*closed/i', description: 'Finds closed application notices' },
     { pattern: '/sorry.*job.*filled/i', description: 'Matches apologetic filled job messages' },
     { pattern: '/this position is no longer accepting applications/i', description: 'Direct "no longer accepting" statements' },
-    { pattern: '/we\'re sorry.*this specific position is no longer available/i', description: 'Mastercard-style unavailable messages' },
+    { pattern: "/we're sorry.*this specific position is no longer available/i", description: 'Mastercard-style unavailable messages' },
     { pattern: '/this job is no longer active/i', description: 'Job no longer active notices' },
     { pattern: '/position has been closed/i', description: 'Position closed announcements' },
     { pattern: '/applications are no longer being accepted/i', description: 'Applications no longer accepted' },
     { pattern: '/this opportunity has expired/i', description: 'Expired opportunity messages' },
     { pattern: '/job opening is closed/i', description: 'Job opening closed notices' },
-    { pattern: '/recruitment for this position has ended/i', description: 'Recruitment ended statements' }
+    { pattern: '/recruitment for this position has ended/i', description: 'Recruitment ended statements' },
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all animate-in fade-in-0 zoom-in-95 duration-300">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+      <div
+        className={[
+          'max-w-lg w-full mx-4 rounded-3xl',
+          'bg-black text-white',
+          // subtle dark edge, no white glow
+          'border border-neutral-900/60 ring-1 ring-black/20',
+          'shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)]',
+        ].join(' ')}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+        <div className="flex items-center justify-between p-6 border-b border-neutral-900/60">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 bg-black">
+              <AlertTriangle className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Job Position Filled</h3>
-              <p className="text-sm text-gray-500">This position is no longer available</p>
+              <h3 className="text-base sm:text-lg font-semibold tracking-tight">Job Position Filled</h3>
+              <p className="text-xs sm:text-sm text-white/60 tracking-tight">This position is no longer available</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="rounded-full p-2 text-white/70 hover:bg-white/10 hover:text-white transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -51,69 +59,70 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
 
         {/* Content */}
         <div className="p-6 space-y-4">
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-            <div className="flex items-start space-x-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="rounded-2xl border border-neutral-800 p-4 bg-black">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-white mt-0.5 shrink-0" />
               <div className="text-sm">
-                <p className="font-medium text-amber-800 mb-1">Position No Longer Available</p>
-                <p className="text-amber-700">
-                  Our system detected that this job posting has been filled or is no longer accepting applications. 
-                  The company has likely updated their careers page to reflect this status.
+                <p className="font-medium text-white mb-1">Position No Longer Available</p>
+                <p className="text-white/80">
+                  Our system detected that this job posting has been filled or is no longer accepting applications.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Why do I see this section */}
-          <div className="border border-gray-200 rounded-lg">
+          {/* Why do I see this */}
+          <div className="border border-neutral-900/60 rounded-2xl overflow-hidden bg-black">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors rounded-lg"
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.06] transition"
             >
-              <span className="text-sm font-medium text-gray-700">Why do I see this?</span>
+              <span className="text-sm font-medium text-white">Why do I see this?</span>
               {showDetails ? (
-                <ChevronUp className="h-4 w-4 text-gray-500" />
+                <ChevronUp className="h-4 w-4 text-white/60" />
               ) : (
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <ChevronDown className="h-4 w-4 text-white/60" />
               )}
             </button>
-            
+
             {showDetails && (
-              <div className="px-4 pb-4 border-t border-gray-100 pt-4 space-y-4">
-                <div className="text-sm text-gray-600 space-y-3">
+              <div className="px-4 pb-4 border-t border-neutral-900/60 pt-4 space-y-4">
+                <div className="text-sm text-white/80 space-y-3">
                   <p>
-                    <strong>How Detection Works:</strong> Our system reads the actual webpage content and 
-                    searches for specific text patterns that companies commonly use when positions are no longer available.
+                    <strong className="text-white">How Detection Works:</strong> We parse the page content and scan for
+                    common “position closed” patterns.
                   </p>
-                  
-                  <div className="bg-gray-50 rounded-lg p-3 border">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Code className="h-4 w-4 text-gray-500" />
-                      <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Detection Patterns</span>
+
+                  <div className="bg-black rounded-2xl p-3 border border-neutral-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Code className="h-4 w-4 text-white/80" />
+                      <span className="text-[11px] font-medium text-white/80 uppercase tracking-wider">
+                        Detection Patterns
+                      </span>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {patterns.map((item, index) => (
-                        <div key={index} className="text-xs">
-                          <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono text-[10px] leading-tight break-all">
+                      {patterns.map((item, i) => (
+                        <div key={i} className="text-xs">
+                          <code className="px-2 py-1 rounded text-white font-mono text-[10px] leading-tight break-all bg-black border border-neutral-800">
                             {item.pattern}
                           </code>
-                          <p className="text-gray-600 mt-1 ml-1">{item.description}</p>
+                          <p className="text-white/60 mt-1 ml-1">{item.description}</p>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
+
                   {detectedPattern && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <p className="text-xs font-medium text-red-800 mb-1">Detected Pattern:</p>
-                      <code className="text-xs bg-red-100 px-2 py-1 rounded text-red-700 font-mono break-all">
+                    <div className="bg-black border border-neutral-800 rounded-2xl p-3">
+                      <p className="text-xs font-medium text-white mb-1">Detected Pattern:</p>
+                      <code className="text-xs px-2 py-1 rounded text-white font-mono break-all bg-black border border-neutral-800">
                         {detectedPattern}
                       </code>
                     </div>
                   )}
-                  
-                  <p className="text-xs text-gray-500 italic">
-                    This prevents you from wasting time applying to positions that are no longer open.
+
+                  <p className="text-[11px] text-white/60 italic">
+                    This helps you avoid applying to roles that are already closed.
                   </p>
                 </div>
               </div>
@@ -121,17 +130,33 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 p-6 border-t border-gray-100 bg-gray-50">
+        {/* Actions (dark pills) */}
+        <div className="flex flex-col sm:flex-row gap-3 p-6 border-t border-neutral-900/60 bg-black rounded-b-3xl">
           <button
             onClick={() => window.open(jobUrl, '_blank')}
-            className="flex-1 inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+            className={[
+              'flex-1 inline-flex justify-center items-center',
+              'h-10 sm:h-11 px-4 rounded-full',
+              'text-sm font-medium tracking-tight',
+              'bg-black text-white border border-neutral-800',
+              'hover:bg-white/10 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/10',
+              'shadow-[0_6px_20px_-10px_rgba(0,0,0,0.6)]',
+            ].join(' ')}
           >
+            <ExternalLink className="h-4 w-4 mr-2" />
             View Original Page
           </button>
+
           <button
             onClick={onClose}
-            className="flex-1 inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
+            className={[
+              'flex-1 inline-flex justify-center items-center',
+              'h-10 sm:h-11 px-4 rounded-full',
+              'text-sm font-medium tracking-tight',
+              'bg-black text-white border border-neutral-800',
+              'hover:bg-white/10 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/10',
+              'shadow-[0_6px_20px_-10px_rgba(0,0,0,0.6)]',
+            ].join(' ')}
           >
             Find Similar Jobs
           </button>
@@ -141,6 +166,9 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
   );
 }
 
+/* -----------------------------
+   Add Bar (Dark Bento)
+------------------------------*/
 export default function AddBar() {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -150,14 +178,12 @@ export default function AddBar() {
     detectedPattern: ''
   });
 
-  // Updated addFromUrl function with loading state
   async function addFromUrl(u) {
     setIsLoading(true);
     try {
       const r = await fetch('/api/extract?url=' + encodeURIComponent(u));
       const data = await r.json();
-      
-      // Check for filled job
+
       if (r.status === 422 && data.type === 'job_filled') {
         setJobFilledAlert({
           isVisible: true,
@@ -166,35 +192,26 @@ export default function AddBar() {
         });
         return;
       }
-      
-      // Handle other errors
-      if (!r.ok) {
-        throw new Error(data.error || 'Failed to fetch');
-      }
-      
-      // Success
+      if (!r.ok) throw new Error(data.error || 'Failed to fetch');
+
       window.dispatchEvent(new CustomEvent('jobs:add', { detail: data }));
       toast.success('Job added.');
       setUrl('');
-      
-    } catch (error) {
-      console.error('Error adding job:', error);
+    } catch (e) {
+      console.error('Error adding job:', e);
       toast.error('Could not add this URL');
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Before calling /api/extract
   function looksJobLike(urlStr) {
     try {
       const u = new URL(urlStr);
       const host = u.hostname.replace(/^www\./, '');
       if (host.includes('youtube.') || host.includes('google.')) return false;
       return true;
-    } catch { 
-      return false; 
-    }
+    } catch { return false; }
   }
 
   async function handleAdd() {
@@ -223,39 +240,38 @@ export default function AddBar() {
     }
   }
 
-  const closeJobFilledAlert = () => {
-    setJobFilledAlert({
-      isVisible: false,
-      jobUrl: '',
-      detectedPattern: ''
-    });
-  };
-
-  const btn =
-    'inline-flex items-center justify-center ' +
-    'h-8 sm:h-9 md:h-10 lg:h-12 ' +
-    'px-2 sm:px-3 md:px-4 ' +
-    'rounded-lg sm:rounded-xl ' +
-    'text-2xs sm:text-xs md:text-sm lg:text-base ' +
-    'bg-neutral-900 text-white border border-neutral-900 hover:bg-black transition ' +
-    'focus:outline-none focus:ring-2 focus:ring-black/20 ' +
-    'whitespace-nowrap leading-none font-medium ' +
-    'disabled:opacity-50 disabled:cursor-not-allowed';
+  const pillBtn = [
+    'inline-flex items-center justify-center',
+    'h-9 sm:h-10 md:h-11 px-4 rounded-full',
+    'text-xs sm:text-sm font-medium tracking-tight',
+    'bg-black text-white border border-neutral-800',
+    'hover:bg-white/10 transition',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/10',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+  ].join(' ');
 
   return (
     <>
       <div className="px-1 sm:px-2 md:px-0">
-        <div className="bg-white border border-neutral-200 rounded-xl sm:rounded-2xl shadow-sm p-1.5 sm:p-2">
-          {/* Mobile: Stacked layout */}
+        {/* Dark bento bar (no white halo) */}
+        <div
+          className={[
+            'rounded-3xl bg-black text-white',
+            'border border-neutral-900/60 ring-1 ring-black/20', // dark edge
+            'shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)]',
+            'p-2.5 sm:p-3',
+          ].join(' ')}
+        >
+          {/* Mobile: stacked */}
           <div className="flex flex-col sm:hidden gap-2">
             <input
-              className="
-                flex-1 h-8 px-3 rounded-lg bg-white
-                outline-none focus:ring-2 focus:ring-black/20
-                placeholder:text-neutral-500 text-xs leading-none
-                border border-neutral-200
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
+              className={[
+                'flex-1 h-10 px-4 rounded-full',
+                'bg-black text-white placeholder:text-white/50',
+                'border-2 border-white', // ✅ thick white border
+                'outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+              ].join(' ')}
               placeholder="Paste job URL…"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -264,44 +280,39 @@ export default function AddBar() {
               inputMode="url"
               disabled={isLoading}
             />
-            <div className="flex gap-1">
-              <button 
-                onClick={handleFromClipboard} 
-                className={btn}
-                disabled={isLoading}
-              >
-                <span className="block sm:hidden">Clipboard</span>
-                <span className="hidden sm:block">From Clipboard</span>
+
+            <div className="flex gap-2">
+              <button onClick={handleFromClipboard} className={pillBtn} disabled={isLoading}>
+                Clipboard
               </button>
               <button
                 onClick={handleAdd}
-                className={btn}
+                className={pillBtn}
                 disabled={!url || isLoading}
                 aria-disabled={!url || isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2 text-xs">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span className="text-xs">Adding...</span>
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-xs">Adding…</span>
                   </div>
                 ) : (
                   <span className="text-xs">Add</span>
                 )}
               </button>
-
             </div>
           </div>
 
-          {/* Desktop: Single row layout */}
-          <div className="hidden sm:flex gap-2 md:gap-3">
+          {/* Desktop: single row */}
+          <div className="hidden sm:flex gap-2 md:gap-3 items-center">
             <input
-              className="
-                flex-1 h-9 sm:h-10 md:h-12 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-white
-                outline-none focus:ring-2 focus:ring-black/20
-                placeholder:text-neutral-500 text-sm sm:text-[15px] leading-none
-                border border-neutral-200
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
+              className={[
+                'flex-1 h-10 sm:h-11 md:h-12 px-4 sm:px-5 rounded-full',
+                'bg-black text-white placeholder:text-white/50',
+                'border border-neutral-800',
+                'outline-none focus-visible:ring-2 focus-visible:ring-white/10 focus-visible:ring-offset-0',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+              ].join(' ')}
               placeholder="Paste job URL…"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -311,26 +322,30 @@ export default function AddBar() {
               disabled={isLoading}
             />
 
-            <button 
-              onClick={handleFromClipboard} 
-              className={btn}
+            <button
+              onClick={handleFromClipboard}
               disabled={isLoading}
+              className={[
+                pillBtn,
+                "bg-white text-black border border-black hover:bg-neutral-100 " +
+                "focus-visible:ring-black/20"
+              ].join(" ")}
             >
-              <span className="hidden md:block text-xs">From Clipboard</span>
-              <span className="block md:hidden">Clipboard</span>
+              <span className="hidden md:block text-black">From Clipboard</span>
+              <span className="block md:hidden text-black">Clipboard</span>
             </button>
 
             <button
               onClick={handleAdd}
-              className={btn}
+              className={pillBtn}
               disabled={!url || isLoading}
               aria-disabled={!url || isLoading}
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                  <span className="hidden sm:block text-xs">Adding...</span>
-                  <span className="block sm:hidden">...</span>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="hidden sm:block text-xs">Adding…</span>
+                  <span className="block sm:hidden">…</span>
                 </div>
               ) : (
                 'Add'
@@ -343,7 +358,7 @@ export default function AddBar() {
       {/* Job Filled Alert */}
       <JobFilledAlert
         isVisible={jobFilledAlert.isVisible}
-        onClose={closeJobFilledAlert}
+        onClose={() => setJobFilledAlert({ isVisible: false, jobUrl: '', detectedPattern: '' })}
         jobUrl={jobFilledAlert.jobUrl}
         detectedPattern={jobFilledAlert.detectedPattern}
       />

@@ -15,7 +15,7 @@ export default function Header({ compact }) {
               "rounded-full bg-black text-white border border-black/10",
               "backdrop-blur shadow-[0_12px_40px_-20px_rgba(0,0,0,0.35)]",
               "px-3 sm:px-4 md:px-6 lg:px-8",
-              "py-2 sm:py-5",
+              "py-6 sm:py-6",
               "flex flex-col md:flex-row items-center md:items-center gap-3 md:gap-4",
             ].join(" ")}
           >
