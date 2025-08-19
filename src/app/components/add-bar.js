@@ -90,7 +90,7 @@ function JobFilledAlert({ isVisible, onClose, jobUrl, detectedPattern }) {
                 <div className="text-sm text-white/80 space-y-3">
                   <p>
                     <strong className="text-white">How Detection Works:</strong> We parse the page content and scan for
-                    common “position closed” patterns.
+                    common "position closed" patterns.
                   </p>
 
                   <div className="bg-black rounded-2xl p-3 border border-neutral-800">
@@ -240,16 +240,6 @@ export default function AddBar() {
     }
   }
 
-  const pillBtn = [
-    'inline-flex items-center justify-center',
-    'h-9 sm:h-10 md:h-11 px-4 rounded-full',
-    'text-xs sm:text-sm font-medium tracking-tight',
-    'bg-black text-white border border-neutral-800',
-    'hover:bg-white/10 transition',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/10',
-    'disabled:opacity-50 disabled:cursor-not-allowed',
-  ].join(' ');
-
   return (
     <>
       <div className="px-1 sm:px-2 md:px-0">
@@ -262,15 +252,16 @@ export default function AddBar() {
             'p-2.5 sm:p-3',
           ].join(' ')}
         >
-          {/* Mobile: stacked */}
-          <div className="flex flex-col sm:hidden gap-2">
+          {/* Mobile: stacked with better sizing */}
+          <div className="flex flex-col sm:hidden gap-3">
             <input
               className={[
-                'flex-1 h-10 px-4 rounded-full',
+                'w-full h-12 px-4 rounded-full',
                 'bg-black text-white placeholder:text-white/50',
-                'border-2 border-white', // ✅ thick white border
-                'outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0',
+                'border border-neutral-800', // ✅ removed thick white border for mobile
+                'outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
+                'text-sm',
               ].join(' ')}
               placeholder="Paste job URL…"
               value={url}
@@ -281,23 +272,43 @@ export default function AddBar() {
               disabled={isLoading}
             />
 
-            <div className="flex gap-2">
-              <button onClick={handleFromClipboard} className={pillBtn} disabled={isLoading}>
+            <div className="flex gap-3">
+              <button 
+                onClick={handleFromClipboard} 
+                className={[
+                  'flex-1 inline-flex items-center justify-center',
+                  'h-11 px-4 rounded-full',
+                  'text-sm font-medium tracking-tight',
+                  'bg-white text-black border border-white',
+                  'hover:bg-neutral-100 hover:text-black transition',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                ].join(' ')}
+                disabled={isLoading}
+              >
                 Clipboard
               </button>
               <button
                 onClick={handleAdd}
-                className={pillBtn}
+                className={[
+                  'flex-1 inline-flex items-center justify-center',
+                  'h-11 px-4 rounded-full',
+                  'text-sm font-medium tracking-tight',
+                  'bg-gray-700 text-white border border-gray-700', // ✅ bg-gray-700 as requested
+                  'hover:bg-gray-600 transition',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                ].join(' ')}
                 disabled={!url || isLoading}
                 aria-disabled={!url || isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-xs">Adding…</span>
+                    <span>Adding…</span>
                   </div>
                 ) : (
-                  <span className="text-xs">Add</span>
+                  'Add'
                 )}
               </button>
             </div>
@@ -326,25 +337,37 @@ export default function AddBar() {
               onClick={handleFromClipboard}
               disabled={isLoading}
               className={[
-                pillBtn,
-                "bg-white text-black border border-black hover:bg-neutral-100 " +
-                "focus-visible:ring-black/20"
-              ].join(" ")}
+                'inline-flex items-center justify-center',
+                'h-10 sm:h-11 md:h-12 px-4 rounded-full',
+                'text-xs sm:text-sm font-medium tracking-tight',
+                'bg-white text-black border border-white',
+                'hover:bg-neutral-100 hover:text-black transition', // ✅ fixed hover colors
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+              ].join(' ')}
             >
-              <span className="hidden md:block text-black">From Clipboard</span>
-              <span className="block md:hidden text-black">Clipboard</span>
+              <span className="hidden md:block">From Clipboard</span>
+              <span className="block md:hidden">Clipboard</span>
             </button>
 
             <button
               onClick={handleAdd}
-              className={pillBtn}
+              className={[
+                'inline-flex items-center justify-center',
+                'h-10 sm:h-11 md:h-12 px-4 rounded-full',
+                'text-xs sm:text-sm font-medium tracking-tight',
+                'bg-neutral-800 text-white border border-neutral-800', // ✅ bg-gray-700 as requested
+                'hover:bg-gray-600 transition',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-800',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+              ].join(' ')}
               disabled={!url || isLoading}
               aria-disabled={!url || isLoading}
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="hidden sm:block text-xs">Adding…</span>
+                  <span className="hidden sm:block">Adding…</span>
                   <span className="block sm:hidden">…</span>
                 </div>
               ) : (
