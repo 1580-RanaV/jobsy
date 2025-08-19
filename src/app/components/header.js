@@ -12,7 +12,7 @@ export default function Header({ compact }) {
         <div className="mx-auto w-full lg:w-[min(100%,62rem)]">
           <div
             className={[
-              "rounded-full bg-black text-white border border-black/10",
+              "rounded-3xl bg-black text-white border border-black/10",
               "backdrop-blur shadow-[0_12px_40px_-20px_rgba(0,0,0,0.35)]",
               "px-3 sm:px-4 md:px-6 lg:px-8",
               "py-6 sm:py-6",
@@ -26,7 +26,6 @@ export default function Header({ compact }) {
               className="flex items-center gap-2 md:gap-3"
             >
               <div className="h-6 w-6 md:h-7 md:w-7 rounded-full bg-white" />
-              <div className="h-6 w-6 md:h-7 md:w-7 rounded-full bg-black border-2 border-white" />
               <span className="font-bold tracking-tight text-white text-base md:text-2xl">
                 Jobsy
               </span>
