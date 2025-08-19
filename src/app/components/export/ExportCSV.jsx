@@ -38,7 +38,7 @@ export default function ExportCSV() {
               <tr className="border-b border-white/5">
                 <td className="py-2 pr-6">Google</td>
                 <td className="py-2 pr-6">Software Engineer</td>
-                <td className="py-2 pr-6">$140k–$180k</td>
+                <td className="py-2 pr-6">Rs.140k–180k</td>
                 <td className="py-2 pr-6">Dec 15</td>
                 <td className="py-2">
                   <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-emerald-200">Applied</span>
@@ -47,7 +47,7 @@ export default function ExportCSV() {
               <tr>
                 <td className="py-2 pr-6">Stripe</td>
                 <td className="py-2 pr-6">Design Lead</td>
-                <td className="py-2 pr-6">$150k–$200k</td>
+                <td className="py-2 pr-6">Rs.150k–200k</td>
                 <td className="py-2 pr-6">Dec 18</td>
                 <td className="py-2">
                   <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-red-200">Not applied</span>

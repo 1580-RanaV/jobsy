@@ -34,7 +34,7 @@ export default function PrivacyLocal() {
           { n: "100%", label: "Yours" },
         ].map((x) => (
           <div key={x.label} className="rounded-2xl bg-white/[0.03] p-5 text-center ring-1 ring-white/10">
-            <div className="text-2xl font-bold">{x.n}</div>
+            <div className="text-xl font-bold">{x.n}</div>
             <div className="text-xs text-neutral-300">{x.label}</div>
           </div>
         ))}

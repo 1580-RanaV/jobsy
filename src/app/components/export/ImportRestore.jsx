@@ -48,7 +48,7 @@ export default function ImportRestore() {
         <button className="rounded-full border border-white/15 bg-white/10 px-4 py-2 font-bold text-white transition-colors hover:bg-white/15">
           Import JSON
         </button>
-        <span className="rounded-full bg-white/10 px-3 py-1">Local-only</span>
+        <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 font-bold text-white transition-colors hover:bg-white/15">Local-only</span>
       </div>
     </div>
   )
