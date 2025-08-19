@@ -1,18 +1,15 @@
 import React from 'react'
+import SectionHeader from './SectionHeader'
 
 const ThreeStep = () => {
   return (
     <div>
+      
+    <div>
         <section className="py-32">
+          <SectionHeader />
           <div className="mx-auto max-w-8xl px-6 lg:px-8">
             <div className="rounded-3xl bg-neutral-950 p-10 text-white shadow-2xl ring-1 ring-white/10">
-              {/* Header */}
-              <div className="mb-14 text-center">
-                <h2 className="mb-4 text-4xl font-bold md:text-8xl">Three Steps to Success</h2>
-                <p className="mx-auto max-w-3xl text-base font-medium text-neutral-300">
-                  From job link to job offer in the simplest way possible.
-                </p>
-              </div>
 
               {/* Steps grid */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -96,6 +93,7 @@ const ThreeStep = () => {
             </div>
           </div>
         </section>
+    </div>
     </div>
   )
 }

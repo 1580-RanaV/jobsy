@@ -19,7 +19,7 @@ import ExportImport from "./components/bento/ExportImport";
 import SmartApplyReminders from "./components/bento/SmartApplyReminders";
 
 // Spotlight sections
-import ThreeStep from "./components/ThreeStep";
+import ThreeStep from "./components/ThreeSteps/ThreeStep";
 import WhyJobsyWorks from "./components/why/WhyJobsyWorks";
 import ExportSection from "./components/export/ExportSection";
 
