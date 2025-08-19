@@ -49,7 +49,7 @@ const HeroSection = () => {
 
           <span className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-neutral-900"></span>
-            Identify inactive job postings.
+            Identify inactive jobs.
           </span>
 
           <span className="flex items-center gap-2">

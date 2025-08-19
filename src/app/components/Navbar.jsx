@@ -115,8 +115,8 @@ const Navbar = () => {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-black rounded-full" />
-            <span className="text-lg font-bold tracking-tighter text-black">Jobsy</span>
+            <div className="w-8 h-8 bg-white rounded-full" />
+            <span className="text-lg font-bold tracking-tighter text-white">Jobsy</span>
           </div>
           <button
             className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-300 hover:bg-gray-50 transition"
@@ -129,7 +129,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        <div className="mt-4 space-y-1">
+        <div className="mt-4">
           <button
             onClick={() => scrollToSection("features")}
             className="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 text-black font-medium tracking-tighter transition"
@@ -156,7 +156,7 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <div className="text-center mt-3 pt-2 border-t border-gray-200 text-[10px] text-gray-500">
+        <div className="text-center mt-3 pt-2 border-t border-gray-400 text-[10px] text-gray-800">
           <p className="px-1">No login. Absoultely free. Takes 3 seconds to start.</p>
         </div>
       </div>
