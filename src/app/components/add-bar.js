@@ -193,6 +193,8 @@ async function addFromUrl(u) {
         jobUrl: data.url || u,
         detectedPattern: data.detectedPattern || ''
       });
+      // ✅ Clear input after job filled alert
+      setUrl('');
       return; // handled; don't throw
     }
 
@@ -201,13 +203,15 @@ async function addFromUrl(u) {
       // Map a few common cases to better messages
       const msg =
         data?.error ||
-        (r.status === 400 ? 'That doesn’t look like a job posting link.' :
-         r.status === 404 ? 'We couldn’t load that page.' :
-         r.status === 429 ? 'You’re going too fast. Try again in a moment.' :
+        (r.status === 400 ? 'That doesnt look like a job posting link.' :
+         r.status === 404 ? 'We couldnt load that page.' :
+         r.status === 429 ? 'Youre going too fast. Try again in a moment.' :
          r.status >= 500 ? 'Server had a hiccup. Try again.' :
          'Could not add this URL');
 
       toast.error(msg);
+      // ✅ Clear input after error
+      setUrl('');
       return; // important: don't throw -> no scary console error
     }
 
@@ -219,6 +223,8 @@ async function addFromUrl(u) {
     // Network/unknown failures
     console.error('Error adding job:', e);
     toast.error('Network error while adding this URL');
+    // ✅ Clear input after network error
+    setUrl('');
   } finally {
     setIsLoading(false);
   }
@@ -256,6 +262,8 @@ function looksJobLike(urlStr) {
     if (!url || isLoading) return;
     if (!looksJobLike(url)) {
       toast.error("That doesn't look like a job posting URL");
+      // ✅ Clear input after validation error
+      setUrl('');
       return;
     }
     await addFromUrl(url);
