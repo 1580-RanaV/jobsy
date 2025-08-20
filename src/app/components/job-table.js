@@ -13,22 +13,48 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
   const [drawerJob, setDrawerJob] = useState(null);
   const [deleteJob, setDeleteJob] = useState(null);
 
-  function filtered() {
-    let list = jobs || [];
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        j =>
-          (j.company || '').toLowerCase().includes(q) ||
-          (j.role || '').toLowerCase().includes(q) ||
-          (j.location || '').toLowerCase().includes(q)
-      );
+  function normalizeDeadline(job) {
+  if (!job) return job;
+  const out = { ...job };
+
+  // If no pretty text but ISO exists, derive it
+  if (!out.deadlineText && out.deadline) {
+    const d = new Date(out.deadline);
+    if (!isNaN(d)) {
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = d.getFullYear();
+      out.deadlineText = `${dd}/${mm}/${yy}`;
+
+      // badge (overdue / due (≤7 days) / ok)
+      const today = new Date(); today.setHours(12,0,0,0);
+      const tgt = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0, 0);
+      const days = Math.floor((tgt - today) / (1000*60*60*24));
+      out.deadlineBadge = days < 0 ? 'overdue' : days <= 7 ? 'due' : 'ok';
     }
-    if (filters === 'applied') list = list.filter(j => j.applied);
-    if (filters === 'pending') list = list.filter(j => !j.applied);
-    if (filters === 'due') list = list.filter(j => j.deadlineBadge === 'due');
-    return list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }
+
+  return out;
+}
+
+
+  function filtered() {
+  let list = (jobs || []).map(normalizeDeadline); // <— added
+  if (search) {
+    const q = search.toLowerCase();
+    list = list.filter(
+      j =>
+        (j.company || '').toLowerCase().includes(q) ||
+        (j.role || '').toLowerCase().includes(q) ||
+        (j.location || '').toLowerCase().includes(q)
+    );
+  }
+  if (filters === 'applied') list = list.filter(j => j.applied);
+  if (filters === 'pending') list = list.filter(j => !j.applied);
+  if (filters === 'due') list = list.filter(j => j.deadlineBadge === 'due');
+  return list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
 
   const filteredJobs = filtered();
 
