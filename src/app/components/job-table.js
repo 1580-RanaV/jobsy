@@ -1,3 +1,4 @@
+
 // components/job-table.js
 'use client';
 
@@ -6,7 +7,7 @@ import EditDrawer from './edit-drawer';
 import ConfirmDelete from './confirm-delete';
 import Badges from './badges';
 import { useState, useRef, useEffect } from 'react';
-import { Search, Filter, ExternalLink, Trash2, Check, X, Plus, Calendar } from 'lucide-react';
+import { Search, Filter, ExternalLink, Trash2, Check, X, Plus, Calendar, MoreVertical } from 'lucide-react';
 
 export default function JobTable({ search, setSearch, filters, setFilters }) {
   const { jobs, toggleApplied, updateJob } = useJobs();
@@ -18,6 +19,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
   const [editValue, setEditValue] = useState('');
 
   const [showCalendar, setShowCalendar] = useState(null);
+  const [showMobileActions, setShowMobileActions] = useState(null);
 
   // Optimistic overlay if updateJob is missing
   const [optimistic, setOptimistic] = useState({}); // { [jobId]: { field: value, ... } }
@@ -26,6 +28,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
   const inputWrapRef = useRef(null);
   const inputElRef = useRef(null);
   const calendarRef = useRef(null);
+  const mobileActionsRef = useRef(null);
 
   // ---- Helpers ------------------------------------------------------------
   const patchJob = (jobId, patch) => {
@@ -89,7 +92,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
 
   const filteredJobs = filtered();
 
-  // ---- Outside click close (editing + calendar) --------------------------
+  // ---- Outside click close (editing + calendar + mobile actions) ---------
   useEffect(() => {
     function handleClickOutside(event) {
       // If editing and click outside the popover, save
@@ -102,10 +105,15 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
         const cal = calendarRef.current;
         if (cal && !cal.contains(event.target)) setShowCalendar(null);
       }
+      // If mobile actions open and click outside, close
+      if (showMobileActions) {
+        const actions = mobileActionsRef.current;
+        if (actions && !actions.contains(event.target)) setShowMobileActions(null);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingCell, showCalendar, editValue]);
+  }, [editingCell, showCalendar, showMobileActions, editValue]);
 
   // Keep focus while typing
   useEffect(() => {
@@ -210,7 +218,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
   ].join(' ');
 
   const filterButton = (isActive) => [
-    'inline-flex items-center justify-center',
+    'inline-flex items-center justify-center whitespace-nowrap',
     'h-9 px-4 rounded-full',
     'text-xs font-medium tracking-tight transition-all duration-200',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
@@ -229,7 +237,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
           <div
             ref={inputWrapRef}
             onMouseDown={(e) => e.stopPropagation()} // don't trigger outside-click while interacting
-            className="absolute -top-12 left-0 z-50 bg-black border border-neutral-700 rounded-lg p-2 shadow-2xl min-w-[220px]"
+            className="fixed inset-x-4 top-20 z-50 bg-black border border-neutral-700 rounded-lg p-4 shadow-2xl sm:absolute sm:inset-x-auto sm:top-[-3rem] sm:left-0 sm:min-w-[220px]"
           >
             <input
               ref={inputElRef}
@@ -247,16 +255,16 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
               ].join(' ')}
               placeholder={`Enter ${field}...`}
             />
-            <div className="flex justify-end gap-2 mt-2">
+            <div className="flex justify-end gap-2 mt-3">
               <button
                 onClick={() => { setEditingCell(null); setEditValue(''); }}
-                className="px-2 py-1 text-xs text-white/60 hover:text-white"
+                className="px-3 py-1 text-xs text-white/60 hover:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="px-2 py-1 text-xs bg-white text-black rounded hover:bg-neutral-100"
+                className="px-3 py-1 text-xs bg-white text-black rounded hover:bg-neutral-100"
               >
                 Save
               </button>
@@ -290,7 +298,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
         {isShowingCalendar && (
           <div
             ref={calendarRef}
-            className="absolute -top-64 left-0 z-50 bg-black border border-neutral-700 rounded-lg p-4 shadow-2xl min-w-[280px]"
+            className="fixed inset-x-4 top-20 z-50 bg-black border border-neutral-700 rounded-lg p-4 shadow-2xl sm:absolute sm:inset-x-auto sm:top-[-16rem] sm:left-0 sm:min-w-[280px]"
           >
             <div className="text-white text-sm font-medium mb-3 flex items-center gap-2">
               <Calendar className="h-4 w-4" />
@@ -355,6 +363,130 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
     );
   };
 
+  // ---- Mobile Actions Menu -----------------------------------------------
+  const MobileActionsMenu = ({ job }) => {
+    const isOpen = showMobileActions === job.id;
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowMobileActions(isOpen ? null : job.id)}
+          className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-neutral-700 text-white/70 hover:text-white hover:border-neutral-600 hover:bg-white/10 transition-all duration-150"
+          title="More actions"
+        >
+          <MoreVertical className="h-4 w-4" />
+        </button>
+
+        {isOpen && (
+          <div
+            ref={mobileActionsRef}
+            className="absolute right-0 top-10 z-50 bg-black border border-neutral-700 rounded-lg shadow-2xl min-w-[160px] py-2"
+          >
+            <button
+              onClick={() => {
+                window.open(job.url, '_blank');
+                setShowMobileActions(null);
+              }}
+              className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open Job
+            </button>
+            <button
+              onClick={() => {
+                toggleApplied(job.id);
+                setShowMobileActions(null);
+              }}
+              className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+            >
+              {job.applied ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+              {job.applied ? 'Mark Unapplied' : 'Mark Applied'}
+            </button>
+            <button
+              onClick={() => {
+                setDeleteJob(job);
+                setShowMobileActions(null);
+              }}
+              className="w-full px-4 py-3 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-3"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete Job
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ---- Mobile Card Layout -------------------------------------------------
+  const MobileJobCard = ({ job }) => (
+    <div className="bg-black border border-neutral-800/50 rounded-xl p-4 space-y-3">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <EditableCell
+            job={job}
+            field="company"
+            value={job.company}
+            className="font-medium text-white text-base leading-tight block"
+          >
+            <div className="truncate">{job.company || 'Company Name'}</div>
+          </EditableCell>
+          <EditableCell
+            job={job}
+            field="role"
+            value={job.role}
+            className="text-white/80 text-sm leading-snug mt-1 block"
+          >
+            <div className="line-clamp-2">{job.role || 'Job Role'}</div>
+          </EditableCell>
+        </div>
+        <div className="ml-3 flex items-center gap-2">
+          <Badges.Applied applied={job.applied} />
+          <MobileActionsMenu job={job} />
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <div className="text-white/50 text-xs uppercase tracking-wide font-medium mb-1">Location</div>
+          <EditableCell
+            job={job}
+            field="location"
+            value={job.location}
+            className="text-white/80 text-sm"
+          >
+            <div className="truncate">{job.location || '—'}</div>
+          </EditableCell>
+        </div>
+        <div>
+          <div className="text-white/50 text-xs uppercase tracking-wide font-medium mb-1">Salary</div>
+          <EditableCell
+            job={job}
+            field="salaryText"
+            value={job.salaryText}
+            className="text-white/80 text-sm"
+          >
+            <div className="truncate" title={job.salaryText || '—'}>
+              {job.salaryText || '—'}
+            </div>
+          </EditableCell>
+        </div>
+        <div>
+          <div className="text-white/50 text-xs uppercase tracking-wide font-medium mb-1">Experience</div>
+          <div className="text-white/80 text-sm truncate">
+            {job.experienceText || '—'}
+          </div>
+        </div>
+        <div>
+          <div className="text-white/50 text-xs uppercase tracking-wide font-medium mb-1">Deadline</div>
+          <DeadlineCell job={job} />
+        </div>
+      </div>
+    </div>
+  );
+
   // ---- Render -------------------------------------------------------------
   return (
     <div className="px-1 sm:px-2 md:px-0">
@@ -364,15 +496,15 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
           'rounded-3xl bg-black text-white',
           'border border-neutral-900/60 ring-1 ring-black/20',
           'shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)]',
-          // allow popovers (calendar) to escape
-          'overflow-visible',
+          // Different overflow handling for mobile vs desktop
+          'overflow-hidden sm:overflow-visible',
         ].join(' ')}
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-neutral-800/50">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex flex-col gap-4 items-start">
             {/* Search input */}
-            <div className="relative flex-1 w-full sm:max-w-sm">
+            <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-white/50" />
               </div>
@@ -390,17 +522,21 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
               />
             </div>
 
-            {/* Filters */}
-            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
-              {['all', 'pending', 'applied', 'due'].map(k => (
-                <button
-                  key={k}
-                  onClick={() => setFilters(k)}
-                  className={filterButton(filters === k)}
-                >
-                  {k === 'all' ? 'All Jobs' : k === 'pending' ? 'Pending' : k === 'applied' ? 'Applied' : 'Due Soon'}
-                </button>
-              ))}
+            {/* Filters - Horizontal scroll on mobile */}
+            <div className="w-full">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                <div className="flex gap-2 flex-shrink-0">
+                  {['all', 'pending', 'applied', 'due'].map(k => (
+                    <button
+                      key={k}
+                      onClick={() => setFilters(k)}
+                      className={filterButton(filters === k)}
+                    >
+                      {k === 'all' ? 'All Jobs' : k === 'pending' ? 'Pending' : k === 'applied' ? 'Applied' : 'Due Soon'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -411,192 +547,154 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-visible">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-black border-b border-neutral-800/50">
-              <tr className="[&>th]:px-4 [&>th]:py-4 text-left text-white/70 text-xs font-medium uppercase tracking-wider">
-                <th className="w-[16%]">Company</th>
-                <th className="w-[28%]">Role</th>
-                <th className="w-[14%]">Location</th>
-                <th className="w-[12%]">Salary</th>
-                <th className="w-[8%]">Exp</th>
-                <th className="w-[10%]">Deadline</th>
-                <th className="w-[8%]">Status</th>
-                <th className="w-[4%] text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredJobs.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center">
-                    <div className="text-white/60">
-                      <div className="text-2xl mb-2">🔍</div>
-                      <div className="text-sm">No jobs found</div>
-                      <div className="text-xs mt-1">Try adjusting your search or filters</div>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredJobs.map((job, index) => (
-                  <tr
-                    key={job.id}
-                    className={[
-                      'hover:bg-white/[0.02] transition-colors duration-150',
-                      index % 2 === 1 ? 'bg-white/[0.01]' : '',
-                      'border-b border-neutral-800/30'
-                    ].join(' ')}
-                  >
-                    <td className="px-4 py-4 align-top">
-                      <EditableCell
-                        job={job}
-                        field="company"
-                        value={job.company}
-                        className="font-medium text-white text-sm leading-tight"
-                      >
-                        {job.company || '—'}
-                      </EditableCell>
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      <EditableCell
-                        job={job}
-                        field="role"
-                        value={job.role}
-                        className="text-white text-sm leading-snug line-clamp-2 max-w-xs"
-                      >
-                        {job.role || '—'}
-                      </EditableCell>
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      <EditableCell
-                        job={job}
-                        field="location"
-                        value={job.location}
-                        className="text-white/80 text-sm"
-                      >
-                        {job.location || '—'}
-                      </EditableCell>
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      <EditableCell
-                        job={job}
-                        field="salaryText"
-                        value={job.salaryText}
-                        className="text-white/80 text-xs leading-tight break-words max-w-[8rem]"
-                      >
-                        <div title={job.salaryText || '—'}>
-                          {job.salaryText || '—'}
-                        </div>
-                      </EditableCell>
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      <div className="text-white/80 text-xs">
-                        {job.experienceText || '—'}
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      <DeadlineCell job={job} />
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      <Badges.Applied applied={job.applied} />
-                    </td>
-
-                    <td className="px-4 py-4 align-top">
-                      {/* Desktop */}
-                      <div className="hidden sm:flex justify-center gap-1.5">
-                        <button
-                          onClick={() => window.open(job.url, '_blank')}
-                          className={darkButton}
-                          title="Open job posting"
-                        >
-                          <ExternalLink className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => toggleApplied(job.id)}
-                          className={primaryButton}
-                          title={job.applied ? 'Mark as not applied' : 'Mark as applied'}
-                        >
-                          {job.applied ? <X className="h-5 w-5" /> : <Check className="h-5 w-5" />}
-                        </button>
-                        <button
-                          onClick={() => setDeleteJob(job)}
-                          className={dangerButton}
-                          title="Delete job"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
-
-                      {/* Mobile */}
-                      <div className="flex sm:hidden flex-col gap-2">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => window.open(job.url, '_blank')}
-                            className={[
-                              'flex-1 inline-flex items-center justify-center gap-2',
-                              'h-9 px-3 rounded-full',
-                              'text-xs font-medium tracking-tight',
-                              'bg-black text-white border border-neutral-800',
-                              'hover:bg-neutral-900 hover:border-neutral-700 transition-all duration-200',
-                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
-                            ].join(' ')}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            <span>Open</span>
-                          </button>
-                          <button
-                            onClick={() => setDeleteJob(job)}
-                            className={[
-                              'flex-1 inline-flex items-center justify-center gap-2',
-                              'h-9 px-3 rounded-full',
-                              'text-xs font-medium tracking-tight',
-                              'bg-red-600 text-white border border-red-600',
-                              'hover:bg-red-700 hover:border-red-700 transition-all duration-200',
-                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20',
-                            ].join(' ')}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span>Delete</span>
-                          </button>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => toggleApplied(job.id)}
-                            className={[
-                              'w-full inline-flex items-center justify-center gap-2',
-                              'h-9 px-3 rounded-full',
-                              'text-xs font-medium tracking-tight',
-                              'bg-white text-black border border-white',
-                              'hover:bg-neutral-100 transition-all duration-200',
-                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
-                            ].join(' ')}
-                          >
-                            {job.applied ? (
-                              <>
-                                <X className="h-4 w-4" />
-                                <span>Unapply</span>
-                              </>
-                            ) : (
-                              <>
-                                <Check className="h-4 w-4" />
-                                <span>Applied</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </td>
+        {/* Content */}
+        <div>
+          {/* Desktop Table */}
+          <div className="hidden sm:block">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[800px]">
+                <thead className="sticky top-0 bg-black border-b border-neutral-800/50">
+                  <tr className="[&>th]:px-4 [&>th]:py-4 text-left text-white/70 text-xs font-medium uppercase tracking-wider">
+                    <th className="w-[16%]">Company</th>
+                    <th className="w-[28%]">Role</th>
+                    <th className="w-[14%]">Location</th>
+                    <th className="w-[12%]">Salary</th>
+                    <th className="w-[8%]">Exp</th>
+                    <th className="w-[10%]">Deadline</th>
+                    <th className="w-[8%]">Status</th>
+                    <th className="w-[4%] text-center">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {filteredJobs.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="px-4 py-12 text-center">
+                        <div className="text-white/60">
+                          <div className="text-2xl mb-2">🔍</div>
+                          <div className="text-sm">No jobs found</div>
+                          <div className="text-xs mt-1">Try adjusting your search or filters</div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredJobs.map((job, index) => (
+                      <tr
+                        key={job.id}
+                        className={[
+                          'hover:bg-white/[0.02] transition-colors duration-150',
+                          index % 2 === 1 ? 'bg-white/[0.01]' : '',
+                          'border-b border-neutral-800/30'
+                        ].join(' ')}
+                      >
+                        <td className="px-4 py-4 align-top">
+                          <EditableCell
+                            job={job}
+                            field="company"
+                            value={job.company}
+                            className="font-medium text-white text-sm leading-tight"
+                          >
+                            {job.company || '—'}
+                          </EditableCell>
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <EditableCell
+                            job={job}
+                            field="role"
+                            value={job.role}
+                            className="text-white text-sm leading-snug line-clamp-2 max-w-xs"
+                          >
+                            {job.role || '—'}
+                          </EditableCell>
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <EditableCell
+                            job={job}
+                            field="location"
+                            value={job.location}
+                            className="text-white/80 text-sm"
+                          >
+                            {job.location || '—'}
+                          </EditableCell>
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <EditableCell
+                            job={job}
+                            field="salaryText"
+                            value={job.salaryText}
+                            className="text-white/80 text-xs leading-tight break-words max-w-[8rem]"
+                          >
+                            <div title={job.salaryText || '—'}>
+                              {job.salaryText || '—'}
+                            </div>
+                          </EditableCell>
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <div className="text-white/80 text-xs">
+                            {job.experienceText || '—'}
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <DeadlineCell job={job} />
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <Badges.Applied applied={job.applied} />
+                        </td>
+
+                        <td className="px-4 py-4 align-top">
+                          <div className="flex justify-center gap-1.5">
+                            <button
+                              onClick={() => window.open(job.url, '_blank')}
+                              className={darkButton}
+                              title="Open job posting"
+                            >
+                              <ExternalLink className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => toggleApplied(job.id)}
+                              className={primaryButton}
+                              title={job.applied ? 'Mark as not applied' : 'Mark as applied'}
+                            >
+                              {job.applied ? <X className="h-5 w-5" /> : <Check className="h-5 w-5" />}
+                            </button>
+                            <button
+                              onClick={() => setDeleteJob(job)}
+                              className={dangerButton}
+                              title="Delete job"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="block sm:hidden p-4 space-y-4">
+            {filteredJobs.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-white/60">
+                  <div className="text-2xl mb-2">🔍</div>
+                  <div className="text-sm">No jobs found</div>
+                  <div className="text-xs mt-1">Try adjusting your search or filters</div>
+                </div>
+              </div>
+            ) : (
+              filteredJobs.map(job => (
+                <MobileJobCard key={job.id} job={job} />
+              ))
+            )}
+          </div>
         </div>
 
         {/* Footer */}
