@@ -5,60 +5,183 @@ import { useJobs } from '@/app/hooks/use-jobs';
 import EditDrawer from './edit-drawer';
 import ConfirmDelete from './confirm-delete';
 import Badges from './badges';
-import { useState } from 'react';
-import { Search, Filter, ExternalLink, Edit3, Trash2, Check, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, Filter, ExternalLink, Trash2, Check, X, Plus, Calendar } from 'lucide-react';
 
 export default function JobTable({ search, setSearch, filters, setFilters }) {
-  const { jobs, toggleApplied } = useJobs();
+  const { jobs, toggleApplied, updateJob } = useJobs();
+
   const [drawerJob, setDrawerJob] = useState(null);
   const [deleteJob, setDeleteJob] = useState(null);
 
-  function normalizeDeadline(job) {
-  if (!job) return job;
-  const out = { ...job };
+  const [editingCell, setEditingCell] = useState(null);
+  const [editValue, setEditValue] = useState('');
 
-  // If no pretty text but ISO exists, derive it
-  if (!out.deadlineText && out.deadline) {
-    const d = new Date(out.deadline);
-    if (!isNaN(d)) {
-      const dd = String(d.getDate()).padStart(2, '0');
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const yy = d.getFullYear();
-      out.deadlineText = `${dd}/${mm}/${yy}`;
+  const [showCalendar, setShowCalendar] = useState(null);
 
-      // badge (overdue / due (≤7 days) / ok)
-      const today = new Date(); today.setHours(12,0,0,0);
-      const tgt = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0, 0);
-      const days = Math.floor((tgt - today) / (1000*60*60*24));
-      out.deadlineBadge = days < 0 ? 'overdue' : days <= 7 ? 'due' : 'ok';
+  // Optimistic overlay if updateJob is missing
+  const [optimistic, setOptimistic] = useState({}); // { [jobId]: { field: value, ... } }
+
+  // Refs for editing input
+  const inputWrapRef = useRef(null);
+  const inputElRef = useRef(null);
+  const calendarRef = useRef(null);
+
+  // ---- Helpers ------------------------------------------------------------
+  const patchJob = (jobId, patch) => {
+    // 1) If your hook provides updateJob, use it
+    if (typeof updateJob === 'function') {
+      updateJob(jobId, patch);
+      return;
     }
+    // 2) Fallback: optimistic overlay so UI updates immediately
+    setOptimistic(prev => ({
+      ...prev,
+      [jobId]: { ...(prev[jobId] || {}), ...patch },
+    }));
+  };
+
+  function withOptimistic(j) {
+    return optimistic[j.id] ? { ...j, ...optimistic[j.id] } : j;
   }
 
-  return out;
-}
+  function computeDeadlineBadge(dateObj) {
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const tgt = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 12, 0, 0, 0);
+    const days = Math.floor((tgt - today) / (1000 * 60 * 60 * 24));
+    return days < 0 ? 'overdue' : days <= 7 ? 'due' : 'ok';
+  }
 
+  function normalizeDeadline(job) {
+    if (!job) return job;
+    const out = { ...job };
+
+    if (!out.deadlineText && out.deadline) {
+      const d = new Date(out.deadline);
+      if (!isNaN(d)) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yy = d.getFullYear();
+        out.deadlineText = `${dd}/${mm}/${yy}`;
+        out.deadlineBadge = computeDeadlineBadge(d);
+      }
+    }
+
+    return out;
+  }
 
   function filtered() {
-  let list = (jobs || []).map(normalizeDeadline); // <— added
-  if (search) {
-    const q = search.toLowerCase();
-    list = list.filter(
-      j =>
-        (j.company || '').toLowerCase().includes(q) ||
-        (j.role || '').toLowerCase().includes(q) ||
-        (j.location || '').toLowerCase().includes(q)
-    );
+    let list = (jobs || []).map(withOptimistic).map(normalizeDeadline);
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        j =>
+          (j.company || '').toLowerCase().includes(q) ||
+          (j.role || '').toLowerCase().includes(q) ||
+          (j.location || '').toLowerCase().includes(q)
+      );
+    }
+    if (filters === 'applied') list = list.filter(j => j.applied);
+    if (filters === 'pending') list = list.filter(j => !j.applied);
+    if (filters === 'due') list = list.filter(j => j.deadlineBadge === 'due');
+    return list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }
-  if (filters === 'applied') list = list.filter(j => j.applied);
-  if (filters === 'pending') list = list.filter(j => !j.applied);
-  if (filters === 'due') list = list.filter(j => j.deadlineBadge === 'due');
-  return list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-}
-
 
   const filteredJobs = filtered();
 
-  // Dark button styles matching your bento theme
+  // ---- Outside click close (editing + calendar) --------------------------
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // If editing and click outside the popover, save
+      if (editingCell) {
+        const wrap = inputWrapRef.current;
+        if (wrap && !wrap.contains(event.target)) handleSaveEdit();
+      }
+      // If calendar open and click outside, close
+      if (showCalendar) {
+        const cal = calendarRef.current;
+        if (cal && !cal.contains(event.target)) setShowCalendar(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [editingCell, showCalendar, editValue]);
+
+  // Keep focus while typing
+  useEffect(() => {
+    if (editingCell && inputElRef.current) {
+      const el = inputElRef.current;
+      try {
+        el.focus();
+        const value = el.value || '';
+        if (typeof el.setSelectionRange === 'function') {
+          // Put caret at end without blurring
+          const pos = Math.min(value.length, 25);
+          el.setSelectionRange(pos, pos);
+        }
+      } catch {}
+    }
+  }, [editingCell, editValue]);
+
+  // ---- Editing handlers ---------------------------------------------------
+  const handleCellClick = (jobId, field, currentValue) => {
+    if (field === 'deadline') {
+      setEditingCell(null);
+      setShowCalendar(jobId);
+      return;
+    }
+    setShowCalendar(null);
+    setEditingCell({ jobId, field });
+    setEditValue((currentValue || '').slice(0, 25));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingCell) return;
+    const { jobId, field } = editingCell;
+    const trimmedValue = editValue.trim().slice(0, 25);
+    patchJob(jobId, { [field]: trimmedValue || '' });
+    setEditingCell(null);
+    setEditValue('');
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSaveEdit();
+    else if (e.key === 'Escape') {
+      setEditingCell(null);
+      setEditValue('');
+    }
+  };
+
+  // ---- Calendar -----------------------------------------------------------
+  const handleDateSelect = (jobId, date) => {
+    const iso = date.toISOString();
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yy = date.getFullYear();
+    const deadlineText = `${dd}/${mm}/${yy}`;
+    const deadlineBadge = computeDeadlineBadge(date);
+
+    patchJob(jobId, { deadline: iso, deadlineText, deadlineBadge });
+    setShowCalendar(null);
+  };
+
+  const generateCalendarDays = () => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const firstDayWeek = firstDay.getDay();
+
+    const days = [];
+    for (let i = 0; i < firstDayWeek; i++) days.push(null);
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      days.push(new Date(currentYear, currentMonth, day));
+    }
+    return days;
+  };
+
+  // ---- Buttons ------------------------------------------------------------
   const darkButton = [
     'inline-flex items-center justify-center gap-2',
     'h-8 px-3 rounded-full',
@@ -91,22 +214,161 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
     'h-9 px-4 rounded-full',
     'text-xs font-medium tracking-tight transition-all duration-200',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
-    isActive 
+    isActive
       ? 'bg-white text-black border border-white'
       : 'bg-black text-white/80 border border-neutral-800 hover:bg-neutral-900 hover:text-white hover:border-neutral-700'
   ].join(' ');
 
+  // ---- Editable cell ------------------------------------------------------
+  const EditableCell = ({ job, field, value, className, children }) => {
+    const isEditing = editingCell?.jobId === job.id && editingCell?.field === field;
+
+    return (
+      <div className="relative">
+        {isEditing && (
+          <div
+            ref={inputWrapRef}
+            onMouseDown={(e) => e.stopPropagation()} // don't trigger outside-click while interacting
+            className="absolute -top-12 left-0 z-50 bg-black border border-neutral-700 rounded-lg p-2 shadow-2xl min-w-[220px]"
+          >
+            <input
+              ref={inputElRef}
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              maxLength={25}
+              className={[
+                'w-full px-3 py-2 rounded-md',
+                'bg-neutral-900 text-white placeholder:text-white/50',
+                'border border-neutral-700',
+                'outline-none focus:ring-2 focus:ring-white/20',
+                'text-sm',
+              ].join(' ')}
+              placeholder={`Enter ${field}...`}
+            />
+            <div className="flex justify-end gap-2 mt-2">
+              <button
+                onClick={() => { setEditingCell(null); setEditValue(''); }}
+                className="px-2 py-1 text-xs text-white/60 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="px-2 py-1 text-xs bg-white text-black rounded hover:bg-neutral-100"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div
+          role="button"
+          title="Click to edit"
+          className={[
+            className,
+            'cursor-pointer rounded-md px-2 py-1 transition-all duration-150 border border-transparent',
+            'hover:bg-white/15 hover:border-white/25 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]'
+          ].join(' ')}
+          onClick={() => handleCellClick(job.id, field, value)}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  };
+
+  // ---- Deadline cell ------------------------------------------------------
+  const DeadlineCell = ({ job }) => {
+    const isShowingCalendar = showCalendar === job.id;
+    const hasDeadline = job.deadlineText;
+
+    return (
+      <div className="relative">
+        {isShowingCalendar && (
+          <div
+            ref={calendarRef}
+            className="absolute -top-64 left-0 z-50 bg-black border border-neutral-700 rounded-lg p-4 shadow-2xl min-w-[280px]"
+          >
+            <div className="text-white text-sm font-medium mb-3 flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Select Deadline
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-xs">
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                <div key={day} className="text-center text-white/50 font-medium py-2">
+                  {day}
+                </div>
+              ))}
+              {generateCalendarDays().map((date, index) => {
+                const isToday = date && date.toDateString() === new Date().toDateString();
+                return (
+                  <button
+                    key={index}
+                    onClick={() => date && handleDateSelect(job.id, date)}
+                    disabled={!date}
+                    className={[
+                      'aspect-square flex items-center justify-center rounded-md text-xs transition-colors',
+                      date ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-transparent cursor-default',
+                      isToday ? 'bg-white text-black font-medium' : ''
+                    ].join(' ')}
+                  >
+                    {date?.getDate()}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex justify-end mt-3">
+              <button
+                onClick={() => setShowCalendar(null)}
+                className="px-3 py-1 text-xs text-white/60 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {hasDeadline ? (
+          <div
+            role="button"
+            title="Click to change deadline"
+            className="cursor-pointer rounded-md px-2 py-1 transition-all duration-150 border border-transparent hover:bg-white/15 hover:border-white/25"
+            onClick={() => setShowCalendar(job.id)}
+          >
+            <Badges.Deadline badge={job.deadlineBadge} text={job.deadlineText} />
+          </div>
+        ) : (
+          <div className="flex items-center">
+            <button
+              onClick={() => setShowCalendar(job.id)}
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-neutral-700 text-white/70 hover:text-white hover:border-neutral-600 hover:bg-white/10 transition-all duration-150"
+              title="Add deadline"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ---- Render -------------------------------------------------------------
   return (
     <div className="px-1 sm:px-2 md:px-0">
       {/* Dark bento container */}
-      <div className={[
-        'rounded-3xl bg-black text-white',
-        'border border-neutral-900/60 ring-1 ring-black/20',
-        'shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)]',
-        'overflow-hidden',
-      ].join(' ')}>
-        
-        {/* Header with search and filters */}
+      <div
+        className={[
+          'rounded-3xl bg-black text-white',
+          'border border-neutral-900/60 ring-1 ring-black/20',
+          'shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)]',
+          // allow popovers (calendar) to escape
+          'overflow-visible',
+        ].join(' ')}
+      >
+        {/* Header */}
         <div className="p-4 sm:p-6 border-b border-neutral-800/50">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             {/* Search input */}
@@ -128,7 +390,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
               />
             </div>
 
-            {/* Filter buttons */}
+            {/* Filters */}
             <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
               {['all', 'pending', 'applied', 'due'].map(k => (
                 <button
@@ -142,15 +404,15 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
             </div>
           </div>
 
-          {/* Results count */}
+          {/* Count */}
           <div className="mt-4 flex items-center gap-2 text-xs text-white/60">
             <Filter className="h-3 w-3" />
             <span>{filteredJobs.length} jobs found</span>
           </div>
         </div>
 
-        {/* Table container */}
-        <div className="overflow-x-auto">
+        {/* Table */}
+        <div className="overflow-visible">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-black border-b border-neutral-800/50">
               <tr className="[&>th]:px-4 [&>th]:py-4 text-left text-white/70 text-xs font-medium uppercase tracking-wider">
@@ -177,8 +439,8 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
                 </tr>
               ) : (
                 filteredJobs.map((job, index) => (
-                  <tr 
-                    key={job.id} 
+                  <tr
+                    key={job.id}
                     className={[
                       'hover:bg-white/[0.02] transition-colors duration-150',
                       index % 2 === 1 ? 'bg-white/[0.01]' : '',
@@ -186,77 +448,96 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
                     ].join(' ')}
                   >
                     <td className="px-4 py-4 align-top">
-                      <div className="font-medium text-white text-sm leading-tight">
-                        {job.company || '—'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <div className="text-white text-sm leading-snug line-clamp-2 max-w-xs">
-                        {job.role || '—'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <div className="text-white/80 text-sm">
-                        {job.location || '—'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <div 
-                        className="text-white/80 text-xs leading-tight break-words max-w-[8rem]" 
-                        title={job.salaryText || '—'}
+                      <EditableCell
+                        job={job}
+                        field="company"
+                        value={job.company}
+                        className="font-medium text-white text-sm leading-tight"
                       >
-                        {job.salaryText || '—'}
-                      </div>
+                        {job.company || '—'}
+                      </EditableCell>
                     </td>
+
+                    <td className="px-4 py-4 align-top">
+                      <EditableCell
+                        job={job}
+                        field="role"
+                        value={job.role}
+                        className="text-white text-sm leading-snug line-clamp-2 max-w-xs"
+                      >
+                        {job.role || '—'}
+                      </EditableCell>
+                    </td>
+
+                    <td className="px-4 py-4 align-top">
+                      <EditableCell
+                        job={job}
+                        field="location"
+                        value={job.location}
+                        className="text-white/80 text-sm"
+                      >
+                        {job.location || '—'}
+                      </EditableCell>
+                    </td>
+
+                    <td className="px-4 py-4 align-top">
+                      <EditableCell
+                        job={job}
+                        field="salaryText"
+                        value={job.salaryText}
+                        className="text-white/80 text-xs leading-tight break-words max-w-[8rem]"
+                      >
+                        <div title={job.salaryText || '—'}>
+                          {job.salaryText || '—'}
+                        </div>
+                      </EditableCell>
+                    </td>
+
                     <td className="px-4 py-4 align-top">
                       <div className="text-white/80 text-xs">
                         {job.experienceText || '—'}
                       </div>
                     </td>
+
                     <td className="px-4 py-4 align-top">
-                      <Badges.Deadline badge={job.deadlineBadge} text={job.deadlineText} />
+                      <DeadlineCell job={job} />
                     </td>
+
                     <td className="px-4 py-4 align-top">
                       <Badges.Applied applied={job.applied} />
                     </td>
+
                     <td className="px-4 py-4 align-top">
-                      {/* Desktop: Horizontal icons */}
+                      {/* Desktop */}
                       <div className="hidden sm:flex justify-center gap-1.5">
-                        <button 
-                          onClick={() => window.open(job.url, '_blank')} 
+                        <button
+                          onClick={() => window.open(job.url, '_blank')}
                           className={darkButton}
                           title="Open job posting"
                         >
                           <ExternalLink className="h-5 w-5" />
                         </button>
-                        <button 
-                          onClick={() => setDrawerJob(job)} 
-                          className={darkButton}
-                          title="Edit job details"
-                        >
-                          <Edit3 className="h-5 w-5" />
-                        </button>
-                        <button 
-                          onClick={() => setDeleteJob(job)} 
-                          className={dangerButton}
-                          title="Delete job"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                        <button 
-                          onClick={() => toggleApplied(job.id)} 
+                        <button
+                          onClick={() => toggleApplied(job.id)}
                           className={primaryButton}
                           title={job.applied ? 'Mark as not applied' : 'Mark as applied'}
                         >
                           {job.applied ? <X className="h-5 w-5" /> : <Check className="h-5 w-5" />}
                         </button>
+                        <button
+                          onClick={() => setDeleteJob(job)}
+                          className={dangerButton}
+                          title="Delete job"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
 
-                      {/* Mobile: Stacked buttons with labels */}
+                      {/* Mobile */}
                       <div className="flex sm:hidden flex-col gap-2">
                         <div className="flex gap-2">
-                          <button 
-                            onClick={() => window.open(job.url, '_blank')} 
+                          <button
+                            onClick={() => window.open(job.url, '_blank')}
                             className={[
                               'flex-1 inline-flex items-center justify-center gap-2',
                               'h-9 px-3 rounded-full',
@@ -269,24 +550,8 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
                             <ExternalLink className="h-4 w-4" />
                             <span>Open</span>
                           </button>
-                          <button 
-                            onClick={() => setDrawerJob(job)} 
-                            className={[
-                              'flex-1 inline-flex items-center justify-center gap-2',
-                              'h-9 px-3 rounded-full',
-                              'text-xs font-medium tracking-tight',
-                              'bg-black text-white border border-neutral-800',
-                              'hover:bg-neutral-900 hover:border-neutral-700 transition-all duration-200',
-                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
-                            ].join(' ')}
-                          >
-                            <Edit3 className="h-4 w-4" />
-                            <span>Edit</span>
-                          </button>
-                        </div>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => setDeleteJob(job)} 
+                          <button
+                            onClick={() => setDeleteJob(job)}
                             className={[
                               'flex-1 inline-flex items-center justify-center gap-2',
                               'h-9 px-3 rounded-full',
@@ -299,10 +564,12 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
                             <Trash2 className="h-4 w-4" />
                             <span>Delete</span>
                           </button>
-                          <button 
-                            onClick={() => toggleApplied(job.id)} 
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => toggleApplied(job.id)}
                             className={[
-                              'flex-1 inline-flex items-center justify-center gap-2',
+                              'w-full inline-flex items-center justify-center gap-2',
                               'h-9 px-3 rounded-full',
                               'text-xs font-medium tracking-tight',
                               'bg-white text-black border border-white',
@@ -332,7 +599,7 @@ export default function JobTable({ search, setSearch, filters, setFilters }) {
           </table>
         </div>
 
-        {/* Footer with summary */}
+        {/* Footer */}
         {filteredJobs.length > 0 && (
           <div className="px-4 sm:px-6 py-4 border-t border-neutral-800/50 bg-black">
             <div className="flex items-center justify-between text-xs text-white/60">
